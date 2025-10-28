@@ -22,5 +22,6 @@ jobs:
       - name: Install org-formation
         run: |
           npm install aws-organization-formation
+          cd infrastructure
           npx org-formation validate organization.yml
           npx org-formation update organization.yml
