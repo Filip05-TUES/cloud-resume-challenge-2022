@@ -14,10 +14,10 @@ Organization:
     Properties:
       DefaultOrganizationAccessRoleName: OrganizationAccountAccessRole
 
-  OuProdOU:
+  OuProductionOU:
     Type: OC::ORG::OrganizationalUnit
     Properties:
-      OrganizationalUnitName: OU-Prod
+      OrganizationalUnitName: OU-Production
       Accounts: !Ref AccProductionAccount
 
   OuTestOU:
@@ -29,7 +29,7 @@ Organization:
   AccProductionAccount:
     Type: OC::ORG::Account
     Properties:
-      AccountName: acc-prod
+      AccountName: acc-production
       AccountId: '472387458718'
       RootEmail: ermenkov.aws+production@gmail.com
 

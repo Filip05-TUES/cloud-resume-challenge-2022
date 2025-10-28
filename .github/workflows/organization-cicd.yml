@@ -21,11 +21,6 @@ jobs:
           role-to-assume: arn:aws:iam::744747681339:role/GitHubActions-OrgFormation
           aws-region: eu-north-1
 
-      - name: Debug file location
-        run: |
-          pwd
-          ls -R
-
       - name: Install org-formation and update org
         run: |
           npm install aws-organization-formation
