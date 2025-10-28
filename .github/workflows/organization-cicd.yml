@@ -1,3 +1,5 @@
+name: Update AWS Organization
+
 on:
   push:
     branches: [ main ]
