@@ -1,0 +1,26 @@
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "infrastructure/organization.yml"
+
+jobs:
+  update-org:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials from OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::744747681339:role/GitHubActions-OrgFormation
+          aws-region: eu-north-1
+
+      - name: Install org-formation
+        run: |
+          npm install aws-organization-formation
+          npx org-formation validate organization.yml
+          npx org-formation update organization.yml
