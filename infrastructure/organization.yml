@@ -18,7 +18,7 @@ Organization:
     Type: OC::ORG::OrganizationalUnit
     Properties:
       OrganizationalUnitName: OU-Prod
-      Accounts: !Ref AccProductionAccount
+      Accounts: !Ref AccProdAccount
 
   OuTestOU:
     Type: OC::ORG::OrganizationalUnit
@@ -26,7 +26,7 @@ Organization:
       OrganizationalUnitName: OU-Test
       Accounts: !Ref AccTestAccount
 
-  AccProductionAccount:
+  AccProdAccount:
     Type: OC::ORG::Account
     Properties:
       AccountName: acc-prod
