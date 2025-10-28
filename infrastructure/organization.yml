@@ -26,10 +26,10 @@ Organization:
       OrganizationalUnitName: OU-Test
       Accounts: !Ref AccTestAccount
 
-  AccProductionAccount:
+  AccProdAccount:
     Type: OC::ORG::Account
     Properties:
-      AccountName: acc-production
+      AccountName: acc-prod
       AccountId: '472387458718'
       RootEmail: ermenkov.aws+production@gmail.com
 
