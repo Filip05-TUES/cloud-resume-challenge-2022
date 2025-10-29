@@ -14,10 +14,10 @@ Organization:
     Properties:
       DefaultOrganizationAccessRoleName: OrganizationAccountAccessRole
 
-  OuProdOU:
+  OuProductionOU:
     Type: OC::ORG::OrganizationalUnit
     Properties:
-      OrganizationalUnitName: OU-Prod
+      OrganizationalUnitName: OU-Production
       Accounts: !Ref AccProductionAccount
 
   OuTestingOU:
