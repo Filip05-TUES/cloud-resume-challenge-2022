@@ -20,10 +20,10 @@ Organization:
       OrganizationalUnitName: OU-Production
       Accounts: !Ref AccProductionAccount
 
-  OuTestingOU:
+  OuTestOU:
     Type: OC::ORG::OrganizationalUnit
     Properties:
-      OrganizationalUnitName: OU-Testing
+      OrganizationalUnitName: OU-Test
       Accounts: !Ref AccTestAccount
 
   AccProductionAccount:
