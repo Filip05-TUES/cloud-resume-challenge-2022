@@ -26,6 +26,11 @@ Organization:
       OrganizationalUnitName: OU-Testing
       Accounts: !Ref AccTestAccount
 
+  OuShareOU:
+    Type: OC::ORG::OrganizationalUnit
+    Properties:
+      OrganizationalUnitName: OU-Share
+
   AccProductionAccount:
     Type: OC::ORG::Account
     Properties:
