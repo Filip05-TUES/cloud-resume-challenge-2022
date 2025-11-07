@@ -8,12 +8,27 @@ Resources:
       InstanceArn: arn:aws:sso:::instance/ssoins-6508750803701220
       Name: PowerUserAccess
       Description: Power user permission
-      SessionDuration: PT2H
+      SessionDuration: PT1H
       ManagedPolicies:
         - arn:aws:iam::aws:policy/PowerUserAccess
+
+  ViewOnlyPermissionSet:
+    Type: AWS::SSO::PermissionSet
+    Properties:
+      InstanceArn: arn:aws:sso:::instance/ssoins-6508750803701220
+      Name: ViewOnlyAccess
+      Description: Read only permission
+      SessionDuration: PT2H
+      ManagedPolicies:
+        - arn:aws:iam::aws:policy/ReadOnlyAccess
 
 Outputs:
   PowerUserAccessPermissionSetArn:
     Value: !GetAtt PowerUserAccessPermissionSet.PermissionSetArn
     Export:
       Name: PowerUserAccessPermissionSetArn
+
+  ViewOnlyPermissionSetArn:
+    Value: !GetAtt ViewOnlyPermissionSet.PermissionSetArn
+    Export:
+      Name: ViewOnlyPermissionSetArn
