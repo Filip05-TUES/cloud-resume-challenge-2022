@@ -18,6 +18,6 @@ Resources:
       InstanceArn: arn:aws:sso:::instance/ssoins-6508750803701220
       TargetType: AWS_ACCOUNT
       TargetId: 176971015975
-      PermissionSetArn: !ImportValue ViewOnlyPermissionSetArn
+      PermissionSetArn: !ImportValue PowerUserAccessPermissionSetArn
       PrincipalType: USER
       PrincipalId: 60ccf95c-40b1-70c8-aa29-98b6ac9bec83
