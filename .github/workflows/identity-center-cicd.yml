@@ -42,3 +42,11 @@ jobs:
             --stack-name identity-center-permission-sets \
             --query "StackEvents[?ResourceStatus=='CREATE_FAILED'].[LogicalResourceId, ResourceStatusReason]" \
             --output table
+
+      - name: Debug Assignments Failure
+        if: failure()
+        run: |
+          aws cloudformation describe-stack-events \
+            --stack-name identity-center-assignments \
+            --query "StackEvents[?ResourceStatus=='CREATE_FAILED'].[LogicalResourceId, ResourceStatusReason]" \
+            --output table
