@@ -1,0 +1,36 @@
+name: identity-center-cicd
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "infrastructure/identity-center/**"
+
+jobs:
+  deploy-identity-center:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::744747681339:role/GitHubActions-IdentityCenter
+          aws-region: eu-north-1
+
+      - name: Deploy Permission Sets
+        run: |
+          aws cloudformation deploy \
+            --template-file infrastructure/identity-center/permission-sets.yml \
+            --stack-name identity-center-permission-sets \
+            --capabilities CAPABILITY_NAMED_IAM
+
+      - name: Deploy Assignments
+        run: |
+          aws cloudformation deploy \
+            --template-file infrastructure/identity-center/assignments.yml \
+            --stack-name identity-center-assignments \
+            --capabilities CAPABILITY_NAMED_IAM

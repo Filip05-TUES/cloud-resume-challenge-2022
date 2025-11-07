@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Identity Center Assignments
+
+Resources:
+  AdminToProductionAssignment:
+    Type: AWS::SSO::Assignment
+    Properties:
+      InstanceArn: arn:aws:sso:::instance/ssoins-6508750803701220
+      TargetType: AWS_ACCOUNT
+      TargetId: 472387458718
+      PermissionSetArn: !ImportValue PowerUserAccessPermissionSetArn
+      PrincipalType: USER
+      PrincipalId: 60ccf95c-40b1-70c8-aa29-98b6ac9bec83
+
+  AdminToTestAssignment:
+    Type: AWS::SSO::Assignment
+    Properties:
+      InstanceArn: arn:aws:sso:::instance/ssoins-6508750803701220
+      TargetType: AWS_ACCOUNT
+      TargetId: 176971015975
+      PermissionSetArn: !ImportValue ViewOnlyPermissionSetArn
+      PrincipalType: USER
+      PrincipalId: 60ccf95c-40b1-70c8-aa29-98b6ac9bec83
