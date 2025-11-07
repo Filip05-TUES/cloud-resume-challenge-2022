@@ -26,7 +26,9 @@ jobs:
           aws cloudformation deploy \
             --template-file infrastructure/identity-center/permission-sets.yml \
             --stack-name identity-center-permission-sets \
-            --capabilities CAPABILITY_NAMED_IAM
+            --capabilities CAPABILITY_NAMED_IAM \
+            --no-fail-on-empty-changeset \
+            --no-rollback
 
       - name: Deploy Assignments
         run: |
