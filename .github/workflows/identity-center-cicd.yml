@@ -35,3 +35,11 @@ jobs:
             --template-file infrastructure/identity-center/assignments.yml \
             --stack-name identity-center-assignments \
             --capabilities CAPABILITY_NAMED_IAM
+
+      - name: Debug CloudFormation Failure
+        if: failure()
+        run: |
+          aws cloudformation describe-stack-events \
+            --stack-name identity-center-permission-sets \
+            --query "StackEvents[?ResourceStatus=='CREATE_FAILED'].[LogicalResourceId, ResourceStatusReason]" \
+            --output table
