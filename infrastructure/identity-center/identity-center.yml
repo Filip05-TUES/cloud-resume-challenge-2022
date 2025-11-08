@@ -2,23 +2,23 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Identity Center Permission Sets
 
 Resources:
-  ViewOnlyAccessPermissionSet:
+  PowerUserAccessPermissionSet:
     Type: AWS::SSO::PermissionSet
     Properties:
       InstanceArn: arn:aws:sso:::instance/ssoins-6508750803701220
-      Name: ViewOnlyAccess
-      Description: View only permission set
-      SessionDuration: PT2H
+      Name: PowerUserAccess
+      Description: Power user permission
+      SessionDuration: PT1H
       ManagedPolicies:
-        - arn:aws:iam::aws:policy/ReadOnlyAccess
+        - arn:aws:iam::aws:policy/PowerUserAccess
 
-  AdminToProductionAssignment:
+    AdminToProductionAssignment:
     Type: AWS::SSO::Assignment
     Properties:
       InstanceArn: arn:aws:sso:::instance/ssoins-6508750803701220
       TargetType: AWS_ACCOUNT
       TargetId: 472387458718
-      PermissionSetArn: !GetAtt ViewOnlyAccessPermissionSet.PermissionSetArn
+      PermissionSetArn: !GetAtt PowerUserAccessPermissionSet.PermissionSetArn
       PrincipalType: USER
       PrincipalId: 60ccf95c-40b1-70c8-aa29-98b6ac9bec83
 
@@ -28,6 +28,6 @@ Resources:
       InstanceArn: arn:aws:sso:::instance/ssoins-6508750803701220
       TargetType: AWS_ACCOUNT
       TargetId: 176971015975
-      PermissionSetArn: !GetAtt ViewOnlyAccessPermissionSet.PermissionSetArn
+      PermissionSetArn: !GetAtt PowerUserAccessPermissionSet.PermissionSetArn
       PrincipalType: USER
       PrincipalId: 60ccf95c-40b1-70c8-aa29-98b6ac9bec83
