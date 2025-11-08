@@ -8,7 +8,7 @@ Resources:
       InstanceArn: arn:aws:sso:::instance/ssoins-6508750803701220
       Name: PowerUserAccess
       Description: Power user permission
-      SessionDuration: PT1H
+      SessionDuration: PT2H
       ManagedPolicies:
         - arn:aws:iam::aws:policy/ReadOnlyAccess
 
