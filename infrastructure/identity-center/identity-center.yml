@@ -12,7 +12,7 @@ Resources:
       ManagedPolicies:
         - arn:aws:iam::aws:policy/PowerUserAccess
 
-    AdminToProductionAssignment:
+  AdminToProductionAssignment:
     Type: AWS::SSO::Assignment
     Properties:
       InstanceArn: arn:aws:sso:::instance/ssoins-6508750803701220
