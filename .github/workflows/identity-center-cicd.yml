@@ -1,10 +1,10 @@
-name: identity-center-cicd
+name: Update AWS Identity Center
 
 on:
   push:
     branches: [ main ]
     paths:
-      - "infrastructure/identity-center/**"
+      - "infrastructure/identity-center/identity-center.yml"
 
 jobs:
   deploy-identity-center:
@@ -21,32 +21,9 @@ jobs:
           role-to-assume: arn:aws:iam::744747681339:role/GitHubActions-IdentityCenter
           aws-region: eu-north-1
 
-      - name: Deploy Permission Sets
+      - name: Deploy Identity Center
         run: |
           aws cloudformation deploy \
-            --template-file infrastructure/identity-center/permission-sets.yml \
-            --stack-name identity-center-permission-sets \
+            --template-file infrastructure/identity-center/identity-center.yml \
+            --stack-name identity-center \
             --capabilities CAPABILITY_NAMED_IAM
-
-      - name: Deploy Assignments
-        run: |
-          aws cloudformation deploy \
-            --template-file infrastructure/identity-center/assignments.yml \
-            --stack-name identity-center-assignments \
-            --capabilities CAPABILITY_NAMED_IAM
-
-      - name: Debug CloudFormation Failure
-        if: failure()
-        run: |
-          aws cloudformation describe-stack-events \
-            --stack-name identity-center-permission-sets \
-            --query "StackEvents[?ResourceStatus=='CREATE_FAILED'].[LogicalResourceId, ResourceStatusReason]" \
-            --output table
-
-      - name: Debug Assignments Failure
-        if: failure()
-        run: |
-          aws cloudformation describe-stack-events \
-            --stack-name identity-center-assignments \
-            --query "StackEvents[?ResourceStatus=='CREATE_FAILED'].[LogicalResourceId, ResourceStatusReason]" \
-            --output table
