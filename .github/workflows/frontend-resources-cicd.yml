@@ -21,7 +21,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::472387458718:role/GitHubActions-Frontend-Resources
-          aws-region: eu-north-1
+          aws-region: us-east-1
 
       - name: Deploy Frontend Infrastructure
         run: |

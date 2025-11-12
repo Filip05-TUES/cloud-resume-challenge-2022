@@ -63,7 +63,7 @@ Resources:
         Aliases:
           - best-resume-ever.com
         DefaultRootObject: website/pages/main/main.html
-        HttpVersion: http2
+        HttpVersion: http2and3
         IPV6Enabled: true
         PriceClass: PriceClass_100
         Origins:
