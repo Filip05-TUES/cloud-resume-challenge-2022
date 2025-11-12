@@ -1,0 +1,39 @@
+name: Update AWS Frontend Resources
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "infrastructure/resources/frontend.yml"
+
+jobs:
+  deploy-frontend-infrastructure:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::472387458718:role/GitHubActions-Frontend-Resources
+          aws-region: eu-north-1
+
+      - name: Deploy Frontend Infrastructure
+        run: |
+          aws cloudformation deploy \
+            --template-file infrastructure/resources/frontend.yml \
+            --stack-name frontend-resources-stack \
+            --capabilities CAPABILITY_NAMED_IAM
+
+      - name: Debug CloudFormation Failure
+        if: failure()
+        run: |
+          aws cloudformation describe-stack-events \
+            --stack-name frontend-resources-stack \
+            --query "StackEvents[?ResourceStatus=='CREATE_FAILED'].[LogicalResourceId, ResourceStatusReason]" \
+            --output table
