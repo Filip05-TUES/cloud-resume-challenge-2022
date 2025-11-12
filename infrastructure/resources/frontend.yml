@@ -101,18 +101,19 @@ Resources:
     Type: AWS::S3::BucketPolicy
     Properties:
       Bucket: !Ref FrontendBucket
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Sid: AllowCloudFrontAccess
-            Effect: Allow
-            Principal:
-              Service: cloudfront.amazonaws.com
-            Action: s3:GetObject
-            Resource: !Sub "${FrontendBucket.Arn}/*"
-            Condition:
-              StringEquals:
-                "AWS:SourceArn": !GetAtt FrontendCloudFrontDistribution.Arn
+      PolicyDocument: !Sub |
+        {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "AllowCloudFrontAccess",
+              "Effect": "Allow",
+              "Principal": { "Service": "cloudfront.amazonaws.com" },
+              "Action": "s3:GetObject",
+              "Resource": "${FrontendBucket.Arn}/*"
+            }
+          ]
+        }
 
   FrontendDNSRecords:
     Type: AWS::Route53::RecordSetGroup
