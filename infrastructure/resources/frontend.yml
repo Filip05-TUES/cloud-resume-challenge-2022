@@ -63,7 +63,7 @@ Resources:
         Aliases:
           - best-resume-ever.com
         DefaultRootObject: website/pages/main/main.html
-        HttpVersion: http2and3
+        HttpVersion: http2
         IPV6Enabled: true
         PriceClass: PriceClass_100
         Origins:
@@ -81,8 +81,6 @@ Resources:
             - GET
             - HEAD
           Compress: true
-          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
-          OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf
         ViewerCertificate:
           AcmCertificateArn: !Ref FrontendCertificate
           SslSupportMethod: sni-only
