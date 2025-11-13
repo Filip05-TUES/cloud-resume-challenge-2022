@@ -20,8 +20,10 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::472387458718:role/GitHubActions-Frontend-Resources
+          role-to-assume: arn:aws:iam::472387458718:role/TemporaryDeploymentAccess
           aws-region: us-east-1
+          role-session-name: deploy-frontend-resources
+          role-session-policy: ${{ fromJSON(file('policies/frontend-resources-deployment.json')) }}
 
       - name: Deploy Frontend Infrastructure
         run: |
