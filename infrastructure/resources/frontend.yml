@@ -5,7 +5,7 @@ Resources:
   FrontendBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: resume-frontend-bucket
+      BucketName: crc-frontend-bucket
       OwnershipControls:
         Rules:
           - ObjectOwnership: BucketOwnerEnforced
