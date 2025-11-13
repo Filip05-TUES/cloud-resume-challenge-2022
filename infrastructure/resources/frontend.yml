@@ -125,12 +125,11 @@ Resources:
             DNSName: !GetAtt FrontendCloudFrontDistribution.DomainName
             HostedZoneId: Z2FDTNDATAQYW2
 
-  DnssecKmsKey:
+  FrontendDNSSECKmsKey:
     Type: AWS::KMS::Key
     Properties:
       Description: DNSSEC KSK signing key for best-resume-ever.com
       Enabled: true
-      EnableKeyRotation: true
       KeyUsage: SIGN_VERIFY
       KeySpec: ECC_SECG_P256K1
       KeyPolicy:
@@ -153,10 +152,15 @@ Resources:
               - kms:Sign
             Resource: "*"
 
-  DnssecKSK:
+  FrontendDNSSECKSK:
     Type: AWS::Route53::KeySigningKey
     Properties:
       HostedZoneId: Z065821612PL5JPWWEB99
-      KeyManagementServiceArn: !GetAtt DnssecKmsKey.Arn
+      KeyManagementServiceArn: !GetAtt FrontendDNSSECKmsKey.Arn
       Name: ksk_best_resume_ever
       Status: ACTIVE
+
+  FrontendDNSSEC:
+    Type: AWS::Route53::DNSSEC
+    Properties:
+      HostedZoneId: Z065821612PL5JPWWEB99
