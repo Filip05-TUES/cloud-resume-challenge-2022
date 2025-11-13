@@ -35,5 +35,5 @@ jobs:
         run: |
           aws cloudformation describe-stack-events \
             --stack-name identity-center \
-            --query "StackEvents[?ResourceStatus=='CREATE_FAILED' || ResourceStatus=='REVIEW_IN_PROGRESS' || ResourceStatus=='ROLLBACK_IN_PROGRESS'].[LogicalResourceId, ResourceStatus, ResourceStatusReason]"
+            --query "StackEvents[?ResourceStatus=='CREATE_FAILED' || ResourceStatus=='REVIEW_IN_PROGRESS' || ResourceStatus=='ROLLBACK_IN_PROGRESS'].[LogicalResourceId, ResourceStatus, ResourceStatusReason]" \
             --output table

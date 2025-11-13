@@ -107,7 +107,7 @@ Resources:
             Resource: !Sub "${FrontendBucket.Arn}/*"
             Condition:
               StringEquals:
-                "AWS:SourceArn": !GetAtt FrontendCloudFrontDistribution.Arn
+                "AWS:SourceArn": !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${FrontendCloudFrontDistribution}"
 
   FrontendDNSRecords:
     Type: AWS::Route53::RecordSetGroup
