@@ -158,5 +158,5 @@ Resources:
     Properties:
       HostedZoneId: Z065821612PL5JPWWEB99
       KeyManagementServiceArn: !GetAtt DnssecKmsKey.Arn
-      Name: ksk-best-resume-ever
+      Name: ksk_best_resume_ever
       Status: ACTIVE
