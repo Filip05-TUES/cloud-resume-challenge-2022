@@ -1,10 +1,10 @@
-name: Deploy Frontend Website
+name: Update AWS Frontend Website
 
 on:
   push:
     branches: [ main ]
     paths:
-      - "website/**"
+      - "bucket-content/**"
 
 jobs:
   sync-website-to-s3:
@@ -23,10 +23,10 @@ jobs:
           role-to-assume: arn:aws:iam::472387458718:role/GitHubActions-Frontend-Website
           aws-region: us-east-1
 
-      - name: Sync Website Folder To S3
+      - name: Sync Bucket Content Folder To S3
         run: |
-          echo "Syncing website/ folder to S3 bucket..."
-          aws s3 sync website/ s3://crc-frontend-bucket/website/ \
+          echo "Syncing bucket-content/ folder to S3 bucket..."
+          aws s3 sync bucket-content/ s3://crc-frontend-bucket/ \
             --delete \
             --acl bucket-owner-full-control \
             --no-progress
