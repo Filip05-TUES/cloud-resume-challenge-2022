@@ -46,11 +46,11 @@ Resources:
     DependsOn: FrontendCertificate
     Properties:
       HostedZoneId: Z065821612PL5JPWWEB99
-      Name: !Select [0, !GetAtt FrontendCertificate.DomainValidationOptions]
+      Name: best-resume-ever.com
       Type: CNAME
       TTL: 300
       ResourceRecords:
-        - !Select [1, !GetAtt FrontendCertificate.DomainValidationOptions]
+        - Z065821612PL5JPWWEB99
 
   FrontendOAC:
     Type: AWS::CloudFront::OriginAccessControl
