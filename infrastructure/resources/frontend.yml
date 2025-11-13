@@ -41,17 +41,6 @@ Resources:
           HostedZoneId: Z065821612PL5JPWWEB99
       KeyAlgorithm: RSA_2048
 
-  FrontendCertificateValidationRecord:
-    Type: AWS::Route53::RecordSet
-    DependsOn: FrontendCertificate
-    Properties:
-      HostedZoneId: Z065821612PL5JPWWEB99
-      Name: best-resume-ever.com
-      Type: CNAME
-      TTL: 300
-      ResourceRecords:
-        - Z065821612PL5JPWWEB99
-
   FrontendOAC:
     Type: AWS::CloudFront::OriginAccessControl
     Properties:
@@ -63,7 +52,7 @@ Resources:
 
   FrontendCloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
-    DependsOn: FrontendCertificateValidationRecord
+    DependsOn: FrontendCertificate
     Properties:
       DistributionConfig:
         Enabled: true
@@ -88,8 +77,6 @@ Resources:
             - GET
             - HEAD
           Compress: true
-          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
-          OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf
         ViewerCertificate:
           AcmCertificateArn: !Ref FrontendCertificate
           SslSupportMethod: sni-only
