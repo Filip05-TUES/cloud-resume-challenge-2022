@@ -27,13 +27,14 @@ jobs:
         run: |
           aws cloudformation deploy \
             --template-file infrastructure/resources/frontend.yml \
-            --stack-name frontend-resources-stack \
-            --capabilities CAPABILITY_NAMED_IAM
+            --stack-name frontend-resources \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --no-fail-on-empty-changeset
 
       - name: Debug CloudFormation Failure
         if: failure()
         run: |
           aws cloudformation describe-stack-events \
-            --stack-name frontend-resources-stack \
-            --query "StackEvents[?ResourceStatus=='CREATE_FAILED' || ResourceStatus=='REVIEW_IN_PROGRESS'].[LogicalResourceId, ResourceStatus, ResourceStatusReason]" \
+            --stack-name frontend-resources \
+            --query "StackEvents[?ResourceStatus=='CREATE_FAILED' || ResourceStatus=='REVIEW_IN_PROGRESS' || ResourceStatus=='ROLLBACK_IN_PROGRESS'].[LogicalResourceId, ResourceStatus, ResourceStatusReason]"
             --output table

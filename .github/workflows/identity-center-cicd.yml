@@ -27,4 +27,13 @@ jobs:
           aws cloudformation deploy \
             --template-file infrastructure/identity-center/identity-center.yml \
             --stack-name identity-center \
-            --capabilities CAPABILITY_NAMED_IAM
+            --capabilities CAPABILITY_NAMED_IAM \
+            --no-fail-on-empty-changeset
+
+      - name: Debug CloudFormation Failure
+        if: failure()
+        run: |
+          aws cloudformation describe-stack-events \
+            --stack-name identity-center \
+            --query "StackEvents[?ResourceStatus=='CREATE_FAILED' || ResourceStatus=='REVIEW_IN_PROGRESS' || ResourceStatus=='ROLLBACK_IN_PROGRESS'].[LogicalResourceId, ResourceStatus, ResourceStatusReason]"
+            --output table
