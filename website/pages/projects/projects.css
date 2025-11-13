@@ -230,7 +230,6 @@ input[type="radio"] {
     transform: translateX(-80%);
 }
 
-/* Mobile Responsiveness */
 @media (max-width: 768px) {
     .section-grid {
         grid-template-columns: 1fr;
