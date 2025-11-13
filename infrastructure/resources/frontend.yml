@@ -52,7 +52,6 @@ Resources:
 
   FrontendCloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
-    DependsOn: FrontendCertificate
     Properties:
       DistributionConfig:
         Enabled: true
@@ -77,6 +76,8 @@ Resources:
             - GET
             - HEAD
           Compress: true
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+          OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf
         ViewerCertificate:
           AcmCertificateArn: !Ref FrontendCertificate
           SslSupportMethod: sni-only
@@ -104,6 +105,9 @@ Resources:
               Service: cloudfront.amazonaws.com
             Action: s3:GetObject
             Resource: !Sub "${FrontendBucket.Arn}/*"
+            Condition:
+              StringEquals:
+                "AWS:SourceArn": !GetAtt FrontendCloudFrontDistribution.Arn
 
   FrontendDNSRecords:
     Type: AWS::Route53::RecordSetGroup
