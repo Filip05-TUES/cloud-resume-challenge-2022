@@ -151,7 +151,7 @@ Resources:
               - kms:DescribeKey
               - kms:GetPublicKey
               - kms:Sign
-            Resource: !GetAtt DnssecKmsKey.Arn
+            Resource: "*"
 
   DnssecKSK:
     Type: AWS::Route53::KeySigningKey
