@@ -20,10 +20,8 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::472387458718:role/TemporaryDeploymentAccess
+          role-to-assume: arn:aws:iam::472387458718:role/GitHubActions_Frontend_Website
           aws-region: us-east-1
-          role-session-name: deploy-frontend-website
-          role-session-policy: ${{ env.FRONTEND_WEBSITE_POLICY }}
 
       - name: Sync Bucket Content Folder To S3
         run: |
