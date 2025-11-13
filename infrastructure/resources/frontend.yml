@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Frontend Infrastructure
+Description: Frontend IaC Configuration
 
 Resources:
   FrontendBucket:
@@ -119,3 +119,44 @@ Resources:
           AliasTarget:
             DNSName: !GetAtt FrontendCloudFrontDistribution.DomainName
             HostedZoneId: Z2FDTNDATAQYW2
+        - Name: best-resume-ever.com
+          Type: AAAA
+          AliasTarget:
+            DNSName: !GetAtt FrontendCloudFrontDistribution.DomainName
+            HostedZoneId: Z2FDTNDATAQYW2
+
+  DnssecKmsKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: DNSSEC KSK signing key for best-resume-ever.com
+      Enabled: true
+      EnableKeyRotation: true
+      KeyUsage: SIGN_VERIFY
+      KeySpec: ECC_SECG_P256K1
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowAccountAdmin
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: "kms:*"
+            Resource: "*"
+
+          - Sid: AllowRoute53DNSSEC
+            Effect: Allow
+            Principal:
+              Service: route53.amazonaws.com
+            Action:
+              - kms:DescribeKey
+              - kms:GetPublicKey
+              - kms:Sign
+            Resource: !GetAtt DnssecKmsKey.Arn
+
+  DnssecKSK:
+    Type: AWS::Route53::KeySigningKey
+    Properties:
+      HostedZoneId: Z065821612PL5JPWWEB99
+      KeyManagementServiceArn: !GetAtt DnssecKmsKey.Arn
+      Name: ksk-best-resume-ever
+      Status: ACTIVE
