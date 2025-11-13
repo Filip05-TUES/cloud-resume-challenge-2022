@@ -203,7 +203,6 @@ input[type="radio"] {
     display: none;
 }
 
-/* Active dot styling using sibling selectors */
 #slide1:checked ~ .slideshow-nav label[for="slide1"],
 #slide2:checked ~ .slideshow-nav label[for="slide2"],
 #slide3:checked ~ .slideshow-nav label[for="slide3"],
