@@ -23,7 +23,7 @@ jobs:
           role-to-assume: arn:aws:iam::472387458718:role/TemporaryDeploymentAccess
           aws-region: us-east-1
           role-session-name: deploy-frontend-resources
-          role-session-policy: ${{ fromJSON(file('policies/frontend-resources-deployment.json')) }}
+          role-session-policy: $${{ env.FRONTEND_RESOURCES_POLICY }}
 
       - name: Deploy Frontend Infrastructure
         run: |

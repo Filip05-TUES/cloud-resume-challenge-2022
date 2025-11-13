@@ -23,7 +23,7 @@ jobs:
           role-to-assume: arn:aws:iam::472387458718:role/TemporaryDeploymentAccess
           aws-region: us-east-1
           role-session-name: deploy-frontend-website
-          role-session-policy: ${{ fromJSON(file('policies/frontend-website-deployment.json')) }}
+          role-session-policy: ${{ env.FRONTEND_WEBSITE_POLICY }}
 
       - name: Sync Bucket Content Folder To S3
         run: |
