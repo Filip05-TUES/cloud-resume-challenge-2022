@@ -1,0 +1,56 @@
+name: Deploy Frontend Website
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "website/**"
+
+jobs:
+  sync-website-to-s3:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::472387458718:role/GitHubActions-Frontend-Resources
+          aws-region: us-east-1
+
+      - name: Sync website folder to S3
+        run: |
+          echo "Syncing website/ folder to S3 bucket..."
+          aws s3 sync website/ s3://crc-frontend-bucket/ \
+            --delete \
+            --acl bucket-owner-full-control \
+            --no-progress
+
+      - name: Get CloudFront Distribution IDs for the domain
+        id: cf
+        run: |
+          DIST_IDS=$(aws cloudfront list-distributions \
+            --query "DistributionList.Items[?contains(Aliases.Items, 'best-resume-ever.com')].Id" \
+            --output text)
+          echo "Found distribution IDs: $DIST_IDS"
+          echo "distribution_ids=$DIST_IDS" >> $GITHUB_ENV
+
+      - name: Invalidate CloudFront cache
+        if: env.distribution_ids != ''
+        run: |
+          for DIST_ID in $distribution_ids; do
+            echo "Creating invalidation for distribution $DIST_ID..."
+            aws cloudfront create-invalidation \
+              --distribution-id $DIST_ID \
+              --paths "/*"
+          done
+        shell: bash
+
+      - name: Skip CloudFront invalidation if not found
+        if: env.distribution_ids == ''
+        run: echo "No CloudFront distribution found for best-resume-ever.com. Skipping invalidation."

@@ -13,16 +13,16 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials from OIDC
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Install org-formation and update org
+      - name: Install OrgFormation And Update AWS Organization
         run: |
           npm install aws-organization-formation
           npx org-formation validate infrastructure/organization/organization.yml
