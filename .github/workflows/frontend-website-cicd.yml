@@ -14,16 +14,16 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::472387458718:role/GitHubActions-Frontend-Resources
+          role-to-assume: arn:aws:iam::472387458718:role/GitHubActions-Frontend-Website
           aws-region: us-east-1
 
-      - name: Sync website folder to S3
+      - name: Sync Website Folder To S3
         run: |
           echo "Syncing website/ folder to S3 bucket..."
           aws s3 sync website/ s3://crc-frontend-bucket/website/ \
@@ -31,7 +31,7 @@ jobs:
             --acl bucket-owner-full-control \
             --no-progress
 
-      - name: Get CloudFront Distribution IDs for the domain
+      - name: Get CloudFront Distribution IDs For The Domain
         id: cf
         run: |
           DIST_IDS=$(aws cloudfront list-distributions \
@@ -40,7 +40,7 @@ jobs:
           echo "Found distribution IDs: $DIST_IDS"
           echo "distribution_ids=$DIST_IDS" >> $GITHUB_ENV
 
-      - name: Invalidate CloudFront cache
+      - name: Invalidate CloudFront Cache
         if: env.distribution_ids != ''
         run: |
           for DIST_ID in $distribution_ids; do
@@ -51,6 +51,6 @@ jobs:
           done
         shell: bash
 
-      - name: Skip CloudFront invalidation if not found
+      - name: Skip CloudFront Invalidation If Not Found
         if: env.distribution_ids == ''
         run: echo "No CloudFront distribution found for best-resume-ever.com. Skipping invalidation."
