@@ -35,5 +35,5 @@ jobs:
         run: |
           aws cloudformation describe-stack-events \
             --stack-name frontend-resources-stack \
-            --query "StackEvents[?ResourceStatus=='CREATE_FAILED'].[LogicalResourceId, ResourceStatusReason]" \
+            --query "StackEvents[?ResourceStatus=='CREATE_FAILED' || ResourceStatus=='REVIEW_IN_PROGRESS'].[LogicalResourceId, ResourceStatus, ResourceStatusReason]" \
             --output table
