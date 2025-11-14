@@ -159,12 +159,10 @@ Resources:
       KeyManagementServiceArn: !GetAtt FrontendDNSSECKmsKey.Arn
       Name: ksk_best_resume_ever
       Status: ACTIVE
-    DependsOn:
-      - FrontendDNSSECKmsKey
+    DependsOn: FrontendDNSSECKmsKey
 
   FrontendDNSSEC:
     Type: AWS::Route53::DNSSEC
     Properties:
       HostedZoneId: Z065821612PL5JPWWEB99
-    DependsOn:
-        - FrontendDNSSECKSK
+    DependsOn: FrontendDNSSECKSK
