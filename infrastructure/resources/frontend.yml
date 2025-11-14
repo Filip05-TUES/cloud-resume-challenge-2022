@@ -158,5 +158,5 @@ Resources:
     Type: AWS::Route53::DNSSEC
     Properties:
       HostedZoneId: Z065821612PL5JPWWEB99
-  DependsOn:
-      - FrontendDNSSECKSK
+    DependsOn:
+        - FrontendDNSSECKSK
