@@ -135,13 +135,6 @@ Resources:
       KeyPolicy:
         Version: "2012-10-17"
         Statement:
-          - Sid: AllowAccountAdmin
-            Effect: Allow
-            Principal:
-              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
-            Action: "kms:*"
-            Resource: "*"
-
           - Sid: AllowRoute53DNSSEC
             Effect: Allow
             Principal:
@@ -150,7 +143,6 @@ Resources:
               - kms:DescribeKey
               - kms:GetPublicKey
               - kms:Sign
-            Resource: "*"
 
   FrontendDNSSECKSK:
     Type: AWS::Route53::KeySigningKey
@@ -166,3 +158,5 @@ Resources:
     Type: AWS::Route53::DNSSEC
     Properties:
       HostedZoneId: Z065821612PL5JPWWEB99
+  DependsOn:
+      - FrontendDNSSECKSK
