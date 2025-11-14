@@ -135,6 +135,13 @@ Resources:
       KeyPolicy:
         Version: "2012-10-17"
         Statement:
+          - Sid: AllowAccountAdmin
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: "kms:*"
+            Resource: "*"
+
           - Sid: AllowRoute53DNSSEC
             Effect: Allow
             Principal:
