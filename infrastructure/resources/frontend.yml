@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Frontend Infrastructure Configuration
+Description: Frontend IaC Configuration
 
 Resources:
   FrontendBucket:
