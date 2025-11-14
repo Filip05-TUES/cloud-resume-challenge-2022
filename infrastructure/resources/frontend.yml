@@ -131,7 +131,7 @@ Resources:
       Description: DNSSEC KSK signing key for best-resume-ever.com
       Enabled: true
       KeyUsage: SIGN_VERIFY
-      KeySpec: ECC_SECG_P256K1
+      KeySpec: ECC_NIST_P256
       KeyPolicy:
         Version: "2012-10-17"
         Statement:
@@ -139,18 +139,36 @@ Resources:
             Effect: Allow
             Principal:
               AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
-            Action: "kms:*"
+            Action:
+              - kms:UpdateKeyDescription
+              - kms:UpdateAlias
+              - kms:PutKeyPolicy
             Resource: "*"
 
           - Sid: AllowRoute53DNSSEC
             Effect: Allow
             Principal:
-              Service: route53.amazonaws.com
+              Service: dnssec-route53.amazonaws.com
             Action:
               - kms:DescribeKey
               - kms:GetPublicKey
               - kms:Sign
             Resource: "*"
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref "AWS::AccountId"
+              ArnEquals:
+                aws:SourceArn: !Sub "arn:aws:route53:::hostedzone/Z065821612PL5JPWWEB99"
+
+          - Sid: AllowRoute53DNSSECCreateGrant
+            Effect: Allow
+            Principal:
+              Service: dnssec-route53.amazonaws.com
+            Action: kms:CreateGrant
+            Resource: "*"
+            Condition:
+              Bool:
+                kms:GrantIsForAWSResource: true
 
   FrontendDNSSECKSK:
     Type: AWS::Route53::KeySigningKey
