@@ -139,7 +139,20 @@ Resources:
             Effect: Allow
             Principal:
               AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
-            Action: "kms:*"
+            Action:
+              - kms:DescribeKey
+              - kms:GetKeyPolicy
+              - kms:PutKeyPolicy
+              - kms:UpdateKeyDescription
+              - kms:UpdateAlias
+              - kms:CreateAlias
+              - kms:ListAliases
+              - kms:ListKeys
+              - kms:TagResource
+              - kms:UntagResource
+              - kms:ScheduleKeyDeletion
+              - kms:EnableKey
+              - kms:DisableKey
             Resource: "*"
 
           - Sid: AllowRoute53DNSSEC
