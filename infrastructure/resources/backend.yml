@@ -100,3 +100,10 @@ Resources:
       IntegrationUri: !GetAtt BackendLambdaFunction.Arn
       PayloadFormatVersion: "2.0"
       Description: Lambda proxy integration for visitor counter API
+
+  BackendApiRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref BackendApi
+      RouteKey: "GET /visitor"
+      Target: !Sub "integrations/${BackendLambdaIntegration}"
