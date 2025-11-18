@@ -1,0 +1,40 @@
+name: Update AWS Backend Resources
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "infrastructure/resources/backend.yml"
+
+jobs:
+  deploy-backend-infrastructure:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::472387458718:role/GitHubActions_Backend_Resources
+          aws-region: us-east-1
+
+      - name: Deploy Backend Infrastructure
+        run: |
+          aws cloudformation deploy \
+            --template-file infrastructure/resources/backend.yml \
+            --stack-name backend-resources \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --no-fail-on-empty-changeset
+
+      - name: Debug CloudFormation Failure
+        if: failure()
+        run: |
+          aws cloudformation describe-stack-events \
+            --stack-name backend-resources \
+            --query "StackEvents[?ResourceStatus=='CREATE_FAILED' || ResourceStatus=='REVIEW_IN_PROGRESS' || ResourceStatus=='ROLLBACK_IN_PROGRESS'].[LogicalResourceId, ResourceStatus, ResourceStatusReason]" \
+            --output table
