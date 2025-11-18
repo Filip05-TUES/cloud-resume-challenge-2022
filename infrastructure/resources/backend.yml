@@ -64,12 +64,17 @@ Resources:
 
           def lambda_handler(event, context):
               try:
-                  table.update_item(
+                  response = table.update_item(
                       Key={"Id": "visitor_count"},
                       UpdateExpression="ADD views :inc",
-                      ExpressionAttributeValues={":inc": 1}
+                      ExpressionAttributeValues={":inc": 1},
+                      ReturnValues="UPDATED_NEW"
                   )
-                  return {"statusCode": 200, "body": "Visitor counted"}
+                  current_views = response["Attributes"]["views"]
+                  return {
+                      "statusCode": 200,
+                      "body": str(current_views)
+                  }
               except Exception as e:
                   return {"statusCode": 500, "body": str(e)}
       Timeout: 10
