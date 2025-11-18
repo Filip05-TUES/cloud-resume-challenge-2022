@@ -69,3 +69,20 @@ Resources:
             Status: Enabled
             NoncurrentVersionExpiration:
               NoncurrentDays: 30
+
+  BackendLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: VisitorCounterLambda
+      Description: Lambda function to increment visitor counter stored in DynamoDB
+      Runtime: python3.12
+      Handler: app.lambda_handler
+      Role: !GetAtt BackendLambdaExecutionRole.Arn
+      PackageType: Zip
+      Code:
+        S3Bucket: !Ref BackendLambdaCodeBucket
+        S3Key: lambda.zip
+      Timeout: 10
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref BackendDatabase
