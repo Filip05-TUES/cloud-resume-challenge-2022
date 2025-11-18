@@ -45,43 +45,33 @@ Resources:
                   - logs:PutLogEvents
                 Resource: "arn:aws:logs:*:*:*"
 
-  BackendLambdaCodeBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: crc-backend-lambda-code
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-      OwnershipControls:
-        Rules:
-          - ObjectOwnership: BucketOwnerEnforced
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      VersioningConfiguration:
-        Status: Enabled
-      LifecycleConfiguration:
-        Rules:
-          - Id: ExpireOldVersions
-            Status: Enabled
-            NoncurrentVersionExpiration:
-              NoncurrentDays: 30
-
   BackendLambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: VisitorCounterLambda
       Description: Lambda function to increment visitor counter stored in DynamoDB
       Runtime: python3.12
-      Handler: app.lambda_handler
+      Handler: lambda_handler
       Role: !GetAtt BackendLambdaExecutionRole.Arn
       PackageType: Zip
       Code:
-        S3Bucket: !Ref BackendLambdaCodeBucket
-        S3Key: lambda.zip
+        ZipFile: |
+          import boto3
+          import os
+
+          dynamodb = boto3.resource("dynamodb")
+          table = dynamodb.Table(os.environ["TABLE_NAME"])
+
+          def lambda_handler(event, context):
+              try:
+                  table.update_item(
+                      Key={"Id": "visitor_count"},
+                      UpdateExpression="ADD views :inc",
+                      ExpressionAttributeValues={":inc": 1}
+                  )
+                  return {"statusCode": 200, "body": "Visitor counted"}
+              except Exception as e:
+                  return {"statusCode": 500, "body": str(e)}
       Timeout: 10
       Environment:
         Variables:
