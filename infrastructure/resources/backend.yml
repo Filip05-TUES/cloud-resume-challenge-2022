@@ -76,3 +76,18 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref BackendDatabase
+
+  BackendApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: VisitorCounterAPI
+      Description: HTTP API for the Visitor Counter frontend
+      ProtocolType: HTTP
+      CorsConfiguration:
+        AllowOrigins:
+          - "https://best-resume-ever.com"
+        AllowMethods:
+          - GET
+        AllowHeaders:
+          - "*"
+      IpAddressType: DUALSTACK
