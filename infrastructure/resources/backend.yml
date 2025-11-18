@@ -107,3 +107,12 @@ Resources:
       ApiId: !Ref BackendApi
       RouteKey: "GET /visitor"
       Target: !Sub "integrations/${BackendLambdaIntegration}"
+
+BackendLambdaPermission:
+  Type: AWS::Lambda::Permission
+  Properties:
+    FunctionName: !Ref BackendLambdaFunction
+    Action: lambda:InvokeFunction
+    Principal: apigateway.amazonaws.com
+    SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BackendApi}/*/*/visitor"
+    SourceAccount: !Ref "AWS::AccountId"
