@@ -44,3 +44,28 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: "arn:aws:logs:*:*:*"
+
+  BackendLambdaCodeBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: crc-backend-lambda-code
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireOldVersions
+            Status: Enabled
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 30
