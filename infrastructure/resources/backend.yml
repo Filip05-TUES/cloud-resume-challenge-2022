@@ -91,3 +91,12 @@ Resources:
         AllowHeaders:
           - "*"
       IpAddressType: DUALSTACK
+
+  BackendLambdaIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref BackendApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt BackendLambdaFunction.Arn
+      PayloadFormatVersion: "2.0"
+      Description: Lambda proxy integration for visitor counter API
