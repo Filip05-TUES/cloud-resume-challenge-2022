@@ -60,7 +60,7 @@ Resources:
           import os
 
           dynamodb = boto3.resource("dynamodb")
-          table = dynamodb.Table(os.environ["TABLE_NAME"])
+          table = dynamodb.Table("VisitorCounterDB")
 
           def lambda_handler(event, context):
               try:
@@ -78,9 +78,6 @@ Resources:
               except Exception as e:
                   return {"statusCode": 500, "body": str(e)}
       Timeout: 10
-      Environment:
-        Variables:
-          TABLE_NAME: !Ref BackendDatabase
 
   BackendApi:
     Type: AWS::ApiGatewayV2::Api
