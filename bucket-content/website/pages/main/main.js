@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const visitorCountEl = document.getElementById('visitor-count');
 
   if (!localStorage.getItem(COUNTER_KEY)) {
-    fetch('https://hdqdi664jd.execute-api.us-east-1.amazonaws.com/$default/visitor', {
+    fetch('https://hdqdi664jd.execute-api.us-east-1.amazonaws.com/visitor', {
       method: 'GET'
     })
       .then(res => res.text())
