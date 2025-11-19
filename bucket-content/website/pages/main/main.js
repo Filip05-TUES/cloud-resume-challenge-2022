@@ -27,5 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch(err => {
         console.error('Error counting visitor:', err);
       });
+  } else {
+    console.log('Error');
   }
 });
