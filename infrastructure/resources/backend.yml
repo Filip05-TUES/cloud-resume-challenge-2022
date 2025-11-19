@@ -121,3 +121,11 @@ Resources:
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BackendApi}/*/*/visitor"
       SourceAccount: !Ref "AWS::AccountId"
+
+  BackendApiStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref BackendApi
+      StageName: $default
+      AutoDeploy: true
+      Description: Default stage for Visitor Counter API
