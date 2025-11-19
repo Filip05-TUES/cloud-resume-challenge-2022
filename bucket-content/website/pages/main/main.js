@@ -15,14 +15,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const VISITOR_COUNT_KEY = 'visitorCount';
   const visitorCountEl = document.getElementById('visitor-count');
 
-  if (!localStorage.getItem(COUNTER_KEY)) {
+  if (!sessionStorage.getItem(COUNTER_KEY)) {
     fetch('https://hdqdi664jd.execute-api.us-east-1.amazonaws.com/visitor', {
       method: 'GET'
     })
       .then(res => res.text())
       .then(count => {
-        localStorage.setItem(COUNTER_KEY, 'true');
-        localStorage.setItem(VISITOR_COUNT_KEY, count);
+        sessionStorage.setItem(COUNTER_KEY, 'true');
+        sessionStorage.setItem(VISITOR_COUNT_KEY, count);
         visitorCountEl.textContent = `Visitors: ${count}`;
       })
       .catch(err => {
@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
         visitorCountEl.textContent = `Visitors: 0`;
       });
   } else {
-    const count = localStorage.getItem(VISITOR_COUNT_KEY) || '0';
+    const count = sessionStorage.getItem(VISITOR_COUNT_KEY) || '0';
     visitorCountEl.textContent = `Visitors: ${count}`;
   }
 });
