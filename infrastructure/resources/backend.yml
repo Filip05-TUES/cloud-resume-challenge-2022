@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Backend IaC Configuration
+Description: Backend IaC Configuration with GET and POST support
 
 Resources:
   BackendDatabase:
@@ -49,7 +49,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: VisitorCounterLambda
-      Description: Lambda function to increment visitor counter stored in DynamoDB
+      Description: Lambda function to handle GET (read) and POST (increment) for visitor count
       Runtime: python3.12
       Handler: index.lambda_handler
       Role: !GetAtt BackendLambdaExecutionRole.Arn
@@ -62,24 +62,27 @@ Resources:
           table = dynamodb.Table("VisitorCounterDB")
 
           def lambda_handler(event, context):
+              method = event.get("requestContext", {}).get("http", {}).get("method", "GET")
               try:
-                  response = table.update_item(
-                      Key={"Id": "visitor_count"},
-                      UpdateExpression="SET #c = if_not_exists(#c, :start) + :inc",
-                      ExpressionAttributeNames={"#c": "count"},
-                      ExpressionAttributeValues={":inc": 1, ":start": 0},
-                      ReturnValues="UPDATED_NEW"
-                  )
-                  current_count = response["Attributes"]["count"]
-                  return {
-                      "statusCode": 200,
-                      "body": str(current_count)
-                  }
+                  if method == "POST":
+                      response = table.update_item(
+                          Key={"Id": "visitor_count"},
+                          UpdateExpression="SET #c = if_not_exists(#c, :start) + :inc",
+                          ExpressionAttributeNames={"#c": "count"},
+                          ExpressionAttributeValues={":inc": 1, ":start": 0},
+                          ReturnValues="UPDATED_NEW"
+                      )
+                  else:
+                      response = table.get_item(Key={"Id": "visitor_count"})
+                      if "Item" not in response:
+                          table.put_item(Item={"Id": "visitor_count", "count": 0})
+                          response = {"Item": {"count": 0}}
+
+                  current_count = response.get("Attributes", response.get("Item", {})).get("count", 0)
+                  return {"statusCode": 200, "body": str(current_count)}
+
               except Exception as e:
-                  return {
-                      "statusCode": 500,
-                      "body": f"Error: {str(e)}"
-                  }
+                  return {"statusCode": 500, "body": f"Error: {str(e)}"}
       Timeout: 10
 
   BackendApi:
@@ -93,6 +96,7 @@ Resources:
           - "https://best-resume-ever.com"
         AllowMethods:
           - GET
+          - POST
         AllowHeaders:
           - "*"
       IpAddressType: DUALSTACK
@@ -106,11 +110,18 @@ Resources:
       PayloadFormatVersion: "2.0"
       Description: Lambda proxy integration for visitor counter API
 
-  BackendApiRoute:
+  BackendApiRouteGet:
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref BackendApi
       RouteKey: "GET /visitor"
+      Target: !Sub "integrations/${BackendLambdaIntegration}"
+
+  BackendApiRoutePost:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref BackendApi
+      RouteKey: "POST /visitor"
       Target: !Sub "integrations/${BackendLambdaIntegration}"
 
   BackendLambdaPermission:

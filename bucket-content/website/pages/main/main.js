@@ -15,22 +15,30 @@ document.addEventListener("DOMContentLoaded", () => {
   const VISITOR_COUNT_KEY = 'visitorCount';
   const visitorCountEl = document.getElementById('visitor-count');
 
-  if (!sessionStorage.getItem(COUNTER_KEY)) {
-    fetch('https://hdqdi664jd.execute-api.us-east-1.amazonaws.com/visitor', {
-      method: 'GET'
-    })
+  const updateCounterDisplay = (count) => {
+    visitorCountEl.textContent = `Visitors: ${count}`;
+    sessionStorage.setItem(VISITOR_COUNT_KEY, count);
+  };
+
+  const counted = sessionStorage.getItem(COUNTER_KEY);
+  if (!counted) {
+    fetch('https://hdqdi664jd.execute-api.us-east-1.amazonaws.com/visitor', { method: 'POST' })
       .then(res => res.text())
       .then(count => {
         sessionStorage.setItem(COUNTER_KEY, 'true');
-        sessionStorage.setItem(VISITOR_COUNT_KEY, count);
-        visitorCountEl.textContent = `Visitors: ${count}`;
+        updateCounterDisplay(count);
       })
       .catch(err => {
         console.error('Error counting visitor:', err);
-        visitorCountEl.textContent = `Visitors: 0`;
+        updateCounterDisplay(sessionStorage.getItem(VISITOR_COUNT_KEY) || '0');
       });
   } else {
-    const count = sessionStorage.getItem(VISITOR_COUNT_KEY) || '0';
-    visitorCountEl.textContent = `Visitors: ${count}`;
+    fetch('https://hdqdi664jd.execute-api.us-east-1.amazonaws.com/visitor', { method: 'GET' })
+      .then(res => res.text())
+      .then(count => updateCounterDisplay(count))
+      .catch(err => {
+        console.error('Error fetching visitor count:', err);
+        updateCounterDisplay(sessionStorage.getItem(VISITOR_COUNT_KEY) || '0');
+      });
   }
 });
