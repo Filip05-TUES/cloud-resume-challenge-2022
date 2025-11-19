@@ -51,7 +51,7 @@ Resources:
       FunctionName: VisitorCounterLambda
       Description: Lambda function to increment visitor counter stored in DynamoDB
       Runtime: python3.12
-      Handler: lambda_handler
+      Handler: index.lambda_handler
       Role: !GetAtt BackendLambdaExecutionRole.Arn
       PackageType: Zip
       Code:
