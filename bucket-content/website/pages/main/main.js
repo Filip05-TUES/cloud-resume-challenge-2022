@@ -17,20 +17,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const updateCounterDisplay = (count) => {
     visitorCountEl.textContent = `Visitors: ${count}`;
-    sessionStorage.setItem(VISITOR_COUNT_KEY, count);
+    localStorage.setItem(VISITOR_COUNT_KEY, count);
   };
 
-  const counted = sessionStorage.getItem(COUNTER_KEY);
+  const counted = localStorage.getItem(COUNTER_KEY);
   if (!counted) {
     fetch('https://hdqdi664jd.execute-api.us-east-1.amazonaws.com/visitor', { method: 'POST' })
       .then(res => res.text())
       .then(count => {
-        sessionStorage.setItem(COUNTER_KEY, 'true');
+        localStorage.setItem(COUNTER_KEY, 'true');
         updateCounterDisplay(count);
       })
       .catch(err => {
         console.error('Error counting visitor:', err);
-        updateCounterDisplay(sessionStorage.getItem(VISITOR_COUNT_KEY) || '0');
+        updateCounterDisplay(localStorage.getItem(VISITOR_COUNT_KEY) || '0');
       });
   } else {
     fetch('https://hdqdi664jd.execute-api.us-east-1.amazonaws.com/visitor', { method: 'GET' })
@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .then(count => updateCounterDisplay(count))
       .catch(err => {
         console.error('Error fetching visitor count:', err);
-        updateCounterDisplay(sessionStorage.getItem(VISITOR_COUNT_KEY) || '0');
+        updateCounterDisplay(localStorage.getItem(VISITOR_COUNT_KEY) || '0');
       });
   }
 });
