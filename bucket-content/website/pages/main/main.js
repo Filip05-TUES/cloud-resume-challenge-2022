@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+  console.log('Part 1');
   let imdex = 0;
   const txtJob = 'IT Specialist';
   const speed = 100;
@@ -10,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(writeJob, speed);
     }
   }, 1500);
+  console.log('Part 2');
 
   const COUNTER_KEY = 'visitorCounted';
   const visitorCountEl = document.getElementById('visitor-count');
