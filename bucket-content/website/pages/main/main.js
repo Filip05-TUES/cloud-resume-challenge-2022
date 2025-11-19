@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const counted = localStorage.getItem(COUNTER_KEY);
   if (!counted) {
-    fetch('https://hdqdi664jd.execute-api.us-east-1.amazonaws.com/visitor', { method: 'POST' })
+    fetch('https://9845kpdd71.execute-api.us-east-1.amazonaws.com/visitor', { method: 'POST' })
       .then(res => res.text())
       .then(count => {
         localStorage.setItem(COUNTER_KEY, 'true');
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
         updateCounterDisplay(localStorage.getItem(VISITOR_COUNT_KEY) || '0');
       });
   } else {
-    fetch('https://hdqdi664jd.execute-api.us-east-1.amazonaws.com/visitor', { method: 'GET' })
+    fetch('https://9845kpdd71.execute-api.us-east-1.amazonaws.com/visitor', { method: 'GET' })
       .then(res => res.text())
       .then(count => updateCounterDisplay(count))
       .catch(err => {
