@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Backend IaC Configuration with GET and POST support
+Description: Backend IaC Configuration
 
 Resources:
   BackendDatabase:
