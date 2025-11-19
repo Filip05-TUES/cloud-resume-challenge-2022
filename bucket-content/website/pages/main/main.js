@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!sessionStorage.getItem(COUNTER_KEY)) {
     console.log('New visitor!');
-    fetch('https://hdqdi664jd.execute-api.us-east-1.amazonaws.com/$default/visitor', {
+    fetch('https://hdqdi664jd.execute-api.us-east-1.amazonaws.com/visitor', {
       method: 'GET',
     })
       .then(response => response.text())
