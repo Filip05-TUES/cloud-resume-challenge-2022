@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const visitorCountEl = document.getElementById('visitor-count');
 
   if (!sessionStorage.getItem(COUNTER_KEY)) {
-    fetch('https://hdqdi664jd.execute-api.us-east-1.amazonaws.com/$default/visitor')
+    fetch('https://hdqdi664jd.execute-api.us-east-1.amazonaws.com/visitor')
       .then(res => res.text())
       .then(count => {
         sessionStorage.setItem(COUNTER_KEY, 'true');
