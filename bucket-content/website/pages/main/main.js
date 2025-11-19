@@ -1,35 +1,28 @@
 document.addEventListener("DOMContentLoaded", () => {
-  console.log('Part 1');
-  let imdex = 0;
-  const txtJob = 'IT Specialist';
+  let i = 0;
+  const jobText = 'IT Specialist';
   const speed = 100;
 
-  setTimeout(function writeJob() {
-    if (imdex < txtJob.length) {
-      document.getElementById("job").innerHTML += txtJob.charAt(imdex);
-      imdex++;
-      setTimeout(writeJob, speed);
+  const typeJob = () => {
+    if (i < jobText.length) {
+      document.getElementById("job").textContent += jobText.charAt(i++);
+      setTimeout(typeJob, speed);
     }
-  }, 1500);
-  console.log('Part 2');
+  };
+  setTimeout(typeJob, 1500);
 
   const COUNTER_KEY = 'visitorCounted';
   const visitorCountEl = document.getElementById('visitor-count');
 
   if (!sessionStorage.getItem(COUNTER_KEY)) {
-    console.log('New visitor!');
-    fetch('https://hdqdi664jd.execute-api.us-east-1.amazonaws.com/visitor', {
-      method: 'GET',
-    })
-      .then(response => response.text())
-      .then(currentViews => {
+    fetch('https://hdqdi664jd.execute-api.us-east-1.amazonaws.com/$default/visitor')
+      .then(res => res.text())
+      .then(count => {
         sessionStorage.setItem(COUNTER_KEY, 'true');
-        visitorCountEl.textContent = `Visitors: ${currentViews}`;
+        visitorCountEl.textContent = `Visitors: ${count}`;
       })
       .catch(err => {
-        console.error('Error counting visitor:', err);
+        console.error('Visitor counter error:', err);
       });
-  } else {
-    console.log('Error');
   }
 });
