@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setTimeout(typeJob, 1500);
 
   const COUNTER_KEY = 'visitorCounted';
+  const VIEWS = '0';
   const visitorCountEl = document.getElementById('visitor-count');
 
   if (!sessionStorage.getItem(COUNTER_KEY)) {
@@ -19,10 +20,11 @@ document.addEventListener("DOMContentLoaded", () => {
       .then(res => res.text())
       .then(count => {
         sessionStorage.setItem(COUNTER_KEY, 'true');
+        sessionStorage.setItem(VIEWS, `${count}`);
         visitorCountEl.textContent = `Visitors: ${count}`;
       })
       .catch(err => {
-        console.error('Visitor counter error:', err);
+        isitorCountEl.textContent = `Visitors: ${sessionStorage.getItem(VIEWS)}`;
       });
   }
 });
