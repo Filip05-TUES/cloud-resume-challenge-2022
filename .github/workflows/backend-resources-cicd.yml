@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - "infrastructure/resources/backend.yml"
+      - ".github/workflows/backend-resources-cicd.yml"
 
 jobs:
   deploy-backend-infrastructure:
@@ -38,7 +39,7 @@ jobs:
 
       - name: Validate IAM Policy
         run: |
-          cfn_policy_validator validate \
+          python -m cfn_policy_validator validate \
             --template-path infrastructure/resources/backend.yml \
             --region us-east-1
 
