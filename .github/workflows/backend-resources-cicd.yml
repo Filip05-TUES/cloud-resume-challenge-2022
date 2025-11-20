@@ -29,8 +29,10 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install cfn-policy-validator
-        run: pip install cfn-policy-validator
+      - name: Install cfn-policy-validator and Add to PATH
+        run: |
+          pip install cfn-policy-validator
+          echo "/home/runner/.local/bin" >> $GITHUB_PATH
 
       - name: Validate Template Syntax
         run: |
@@ -39,7 +41,7 @@ jobs:
 
       - name: Validate IAM Policy
         run: |
-          python -m cfn_policy_validator validate \
+          cfn_policy_validator validate \
             --template-path infrastructure/resources/backend.yml \
             --region us-east-1
 
