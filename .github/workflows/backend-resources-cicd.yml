@@ -23,10 +23,24 @@ jobs:
           role-to-assume: arn:aws:iam::472387458718:role/GitHubActions_Backend_Resources
           aws-region: us-east-1
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install cfn-policy-validator
+        run: pip install cfn-policy-validator
+
       - name: Validate Template Syntax
         run: |
           aws cloudformation validate-template \
             --template-body file://infrastructure/resources/backend.yml
+
+      - name: Validate IAM Policy
+        run: |
+          cfn_policy_validator validate \
+            --template-path infrastructure/resources/backend.yml \
+            --region us-east-1
 
       - name: Deploy Backend Infrastructure
         run: |
