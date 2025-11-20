@@ -23,6 +23,11 @@ jobs:
           role-to-assume: arn:aws:iam::472387458718:role/GitHubActions_Frontend_Resources
           aws-region: us-east-1
 
+      - name: Validate Template Syntax
+        run: |
+          aws cloudformation validate-template \
+            --template-body file://infrastructure/resources/frontend.yml
+
       - name: Deploy Frontend Infrastructure
         run: |
           aws cloudformation deploy \

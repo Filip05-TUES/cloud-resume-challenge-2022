@@ -23,6 +23,11 @@ jobs:
           role-to-assume: arn:aws:iam::472387458718:role/GitHubActions_Backend_Resources
           aws-region: us-east-1
 
+      - name: Validate Template Syntax
+        run: |
+          aws cloudformation validate-template \
+            --template-body file://infrastructure/resources/backend.yml
+
       - name: Deploy Backend Infrastructure
         run: |
           aws cloudformation deploy \
