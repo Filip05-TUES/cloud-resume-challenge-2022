@@ -127,8 +127,6 @@ Resources:
 
   FrontendDNSSECKmsKey:
     Type: AWS::KMS::Key
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
     Properties:
       Description: DNSSEC KSK signing key for best-resume-ever.com
       Enabled: true
@@ -186,8 +184,6 @@ Resources:
 
   FrontendDNSSECKSK:
     Type: AWS::Route53::KeySigningKey
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
     Properties:
       HostedZoneId: Z065821612PL5JPWWEB99
       KeyManagementServiceArn: !GetAtt FrontendDNSSECKmsKey.Arn
