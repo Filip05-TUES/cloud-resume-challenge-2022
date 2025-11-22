@@ -51,6 +51,9 @@ Resources:
 
   BackendLambdaFunction:
     Type: AWS::Lambda::Function
+    DependsOn:
+      - BackendLambdaExecutionRole
+      - BackendDatabase
     Properties:
       FunctionName: VisitorCounterLambda
       Description: Lambda function to handle GET (read) and POST (increment) for visitor count
@@ -121,6 +124,8 @@ Resources:
 
   BackendRestApi:
     Type: AWS::ApiGateway::RestApi
+    DependsOn:
+      - BackendLambdaFunction
     Properties:
       Name: VisitorCounterAPI
       EndpointConfiguration:
@@ -128,6 +133,8 @@ Resources:
 
   BackendRestApiGatewayResource:
     Type: AWS::ApiGateway::Resource
+    DependsOn:
+      - BackendRestApi
     Properties:
       RestApiId: !Ref BackendRestApi
       ParentId: !GetAtt BackendRestApi.RootResourceId
@@ -135,6 +142,9 @@ Resources:
 
   BackendRestApiGetMethod:
     Type: AWS::ApiGateway::Method
+    DependsOn:
+      - BackendRestApiGatewayResource
+      - BackendLambdaFunction
     Properties:
       RestApiId: !Ref BackendRestApi
       ResourceId: !Ref BackendRestApiGatewayResource
@@ -148,6 +158,9 @@ Resources:
 
   BackendRestApiPostMethod:
     Type: AWS::ApiGateway::Method
+    DependsOn:
+      - BackendRestApiGatewayResource
+      - BackendLambdaFunction
     Properties:
       RestApiId: !Ref BackendRestApi
       ResourceId: !Ref BackendRestApiGatewayResource
@@ -161,6 +174,8 @@ Resources:
 
   BackendRestApiOptionsMethod:
     Type: AWS::ApiGateway::Method
+    DependsOn:
+      - BackendRestApiGatewayResource
     Properties:
       RestApiId: !Ref BackendRestApi
       ResourceId: !Ref BackendRestApiGatewayResource
@@ -197,6 +212,8 @@ Resources:
 
   BackendRestApiStage:
     Type: AWS::ApiGateway::Stage
+    DependsOn:
+      - BackendRestApiDeployment
     Properties:
       StageName: prod
       RestApiId: !Ref BackendRestApi
@@ -211,6 +228,9 @@ Resources:
 
   BackendLambdaRestPermission:
     Type: AWS::Lambda::Permission
+    DependsOn:
+      - BackendRestApiStage
+      - BackendLambdaFunction
     Properties:
       FunctionName: !Ref BackendLambdaFunction
       Action: lambda:InvokeFunction
@@ -220,6 +240,8 @@ Resources:
 
   BackendWAFWebACL:
     Type: AWS::WAFv2::WebACL
+    DependsOn:
+      - BackendRestApiStage
     Properties:
       Name: ApiWAF
       Description: WAF for the visitor counter API Gateway
@@ -272,6 +294,9 @@ Resources:
 
   BackendWAFWebACLAssociation:
     Type: AWS::WAFv2::WebACLAssociation
+    DependsOn:
+      - BackendWAFWebACL
+      - BackendRestApiStage
     Properties:
       ResourceArn: !Sub "arn:aws:apigateway:${AWS::Region}::/restapis/${BackendRestApi}/stages/prod"
       WebACLArn: !GetAtt BackendWAFWebACL.Arn
