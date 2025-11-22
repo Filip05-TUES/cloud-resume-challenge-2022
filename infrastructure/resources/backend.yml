@@ -13,6 +13,8 @@ Resources:
       KeySchema:
         - AttributeName: Id
           KeyType: HASH
+      SSESpecification:
+        SSEEnabled: true
 
   BackendLambdaExecutionRole:
     Type: AWS::IAM::Role
@@ -26,29 +28,26 @@ Resources:
             Principal:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
-
-  BackendLambdaManagedPolicy:
-      Type: AWS::IAM::ManagedPolicy
-      Properties:
-        ManagedPolicyName: VisitorCounterLambdaManagedPolicy
-        Roles:
-          - !Ref BackendLambdaExecutionRole
-        PolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-                - dynamodb:UpdateItem
-                - dynamodb:PutItem
-              Resource: !GetAtt BackendDatabase.Arn
-
-            - Effect: Allow
-              Action:
-                - logs:CreateLogGroup
-                - logs:CreateLogStream
-                - logs:PutLogEvents
-              Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*:*"
+      Path: "/"
+      Policies:
+        - PolicyName: VisitorCounterLambdaInlinePolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: DynamoDBAccess
+                Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                Resource: !GetAtt BackendDatabase.Arn
+              - Sid: CloudWatchLogs
+                Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/VisitorCounterLambda:*"
 
   BackendLambdaFunction:
     Type: AWS::Lambda::Function
@@ -59,95 +58,165 @@ Resources:
       Handler: index.lambda_handler
       Role: !GetAtt BackendLambdaExecutionRole.Arn
       PackageType: Zip
+      Timeout: 10
+      MemorySize: 128
+      Environment:
+        Variables:
+          TABLE_NAME: VisitorCounterDB
+          ALLOWED_ORIGIN: "https://best-resume-ever.com"
       Code:
         ZipFile: |
+          import json
+          import os
           import boto3
 
+          TABLE_NAME = os.environ.get("TABLE_NAME", "VisitorCounterDB")
+          ALLOWED_ORIGIN = os.environ.get("ALLOWED_ORIGIN", "*")
+
           dynamodb = boto3.resource("dynamodb")
-          table = dynamodb.Table("VisitorCounterDB")
+          table = dynamodb.Table(TABLE_NAME)
+
+          def _get_method(event):
+              try:
+                  return event.get("httpMethod") or event.get("requestContext", {}).get("http", {}).get("method")
+              except Exception:
+                  return "GET"
+
+          def _text_response(status, text_body):
+              return {
+                  "statusCode": status,
+                  "headers": {
+                      "Content-Type": "text/plain",
+                      "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
+                      "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+                      "Access-Control-Allow-Headers": "*"
+                  },
+                  "body": str(text_body)
+              }
 
           def lambda_handler(event, context):
-              method = event.get("requestContext", {}).get("http", {}).get("method", "GET")
+              method = _get_method(event) or "GET"
               try:
                   if method == "POST":
-                      response = table.update_item(
+                      res = table.update_item(
                           Key={"Id": "visitor_count"},
                           UpdateExpression="SET #c = if_not_exists(#c, :start) + :inc",
                           ExpressionAttributeNames={"#c": "count"},
                           ExpressionAttributeValues={":inc": 1, ":start": 0},
                           ReturnValues="UPDATED_NEW"
                       )
+                      count = res.get("Attributes", {}).get("count", 0)
+                      return _text_response(200, count)
                   else:
-                      response = table.get_item(Key={"Id": "visitor_count"})
-                      if "Item" not in response:
+                      res = table.get_item(Key={"Id": "visitor_count"})
+                      if "Item" not in res:
                           table.put_item(Item={"Id": "visitor_count", "count": 0})
-                          response = {"Item": {"count": 0}}
-
-                  current_count = response.get("Attributes", response.get("Item", {})).get("count", 0)
-                  return {"statusCode": 200, "body": str(current_count)}
-
+                          count = 0
+                      else:
+                          count = res["Item"].get("count", 0)
+                      return _text_response(200, count)
               except Exception as e:
-                  return {"statusCode": 500, "body": f"Error: {str(e)}"}
-      Timeout: 10
+                  print("Error:", str(e))
+                  return _text_response(500, 0)
 
-  BackendApi:
-    Type: AWS::ApiGatewayV2::Api
+  BackendRestApi:
+    Type: AWS::ApiGateway::RestApi
     Properties:
       Name: VisitorCounterAPI
-      Description: HTTP API for the Visitor Counter frontend
-      ProtocolType: HTTP
-      CorsConfiguration:
-        AllowOrigins:
-          - "https://best-resume-ever.com"
-        AllowMethods:
-          - GET
-          - POST
-        AllowHeaders:
-          - "*"
-      IpAddressType: DUALSTACK
+      EndpointConfiguration:
+        Types: [REGIONAL]
 
-  BackendLambdaIntegration:
-    Type: AWS::ApiGatewayV2::Integration
+  BackendRestApiVisitorResource:
+    Type: AWS::ApiGateway::Resource
     Properties:
-      ApiId: !Ref BackendApi
-      IntegrationType: AWS_PROXY
-      IntegrationUri: !GetAtt BackendLambdaFunction.Arn
-      PayloadFormatVersion: "2.0"
-      Description: Lambda proxy integration for visitor counter API
+      RestApiId: !Ref BackendRestApi
+      ParentId: !GetAtt BackendRestApi.RootResourceId
+      PathPart: visitor
 
-  BackendApiRouteGet:
-    Type: AWS::ApiGatewayV2::Route
+  BackendRestApiGetMethod:
+    Type: AWS::ApiGateway::Method
     Properties:
-      ApiId: !Ref BackendApi
-      RouteKey: "GET /visitor"
-      Target: !Sub "integrations/${BackendLambdaIntegration}"
+      RestApiId: !Ref BackendRestApi
+      ResourceId: !Ref BackendRestApiVisitorResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub >-
+          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${BackendLambdaFunction.Arn}/invocations
 
-  BackendApiRoutePost:
-    Type: AWS::ApiGatewayV2::Route
+  BackendRestApiPostMethod:
+    Type: AWS::ApiGateway::Method
     Properties:
-      ApiId: !Ref BackendApi
-      RouteKey: "POST /visitor"
-      Target: !Sub "integrations/${BackendLambdaIntegration}"
+      RestApiId: !Ref BackendRestApi
+      ResourceId: !Ref BackendRestApiVisitorResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub >-
+          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${BackendLambdaFunction.Arn}/invocations
 
-  BackendLambdaPermission:
+  BackendRestApiOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref BackendRestApi
+      ResourceId: !Ref BackendRestApiVisitorResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{ "statusCode": 200 }'
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'*'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'https://best-resume-ever.com'"
+            ResponseTemplates:
+              application/json: ""
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  BackendRestApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - BackendRestApiGetMethod
+      - BackendRestApiPostMethod
+      - BackendRestApiOptionsMethod
+    Properties:
+      RestApiId: !Ref BackendRestApi
+      Description: Deployment for VisitorCounterAPI
+
+  BackendRestApiStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      StageName: prod
+      RestApiId: !Ref BackendRestApi
+      DeploymentId: !Ref BackendRestApiDeployment
+      MethodSettings:
+        - ResourcePath: "/*"
+          HttpMethod: "*"
+          LoggingLevel: INFO
+          DataTraceEnabled: false
+          ThrottlingBurstLimit: 50
+          ThrottlingRateLimit: 100
+
+  BackendLambdaRestPermission:
     Type: AWS::Lambda::Permission
     Properties:
       FunctionName: !Ref BackendLambdaFunction
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
-      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BackendApi}/*/*/visitor"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BackendRestApi}/*/*/visitor"
       SourceAccount: !Ref "AWS::AccountId"
-
-  BackendApiStage:
-    Type: AWS::ApiGatewayV2::Stage
-    Properties:
-      ApiId: !Ref BackendApi
-      StageName: $default
-      AutoDeploy: true
-      Description: Default stage for Visitor Counter API
-      DefaultRouteSettings:
-        ThrottlingBurstLimit: 50
-        ThrottlingRateLimit: 100
 
   BackendWAFWebACL:
     Type: AWS::WAFv2::WebACL
@@ -204,5 +273,5 @@ Resources:
   BackendWAFWebACLAssociation:
     Type: AWS::WAFv2::WebACLAssociation
     Properties:
-      ResourceArn: !Sub "arn:aws:apigateway:${AWS::Region}::/apis/${BackendApi}/stages/${BackendApiStage}"
+      ResourceArn: !Sub "arn:aws:apigateway:${AWS::Region}::/restapis/${BackendRestApi}/stages/prod"
       WebACLArn: !GetAtt BackendWAFWebACL.Arn
