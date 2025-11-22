@@ -152,14 +152,14 @@ Resources:
   BackendWAFWebACL:
     Type: AWS::WAFv2::WebACL
     Properties:
-      Name: VisitorCounterApiWAF
+      Name: ApiWAF
       Description: WAF for the visitor counter API Gateway
       Scope: REGIONAL
       DefaultAction:
         Allow: {}
       VisibilityConfig:
         CloudWatchMetricsEnabled: true
-        MetricName: VisitorCounterApiWAF
+        MetricName: ApiWAF
         SampledRequestsEnabled: true
       Rules:
         - Name: RateLimit500Per5MinPerIP
