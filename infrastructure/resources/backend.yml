@@ -215,7 +215,7 @@ Resources:
       FunctionName: !Ref BackendLambdaFunction
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
-      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BackendRestApi}/*/*/visitor"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:*/*/visitor"
       SourceAccount: !Ref "AWS::AccountId"
 
   BackendWAFWebACL:
