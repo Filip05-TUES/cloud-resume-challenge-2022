@@ -145,3 +145,64 @@ Resources:
       StageName: $default
       AutoDeploy: true
       Description: Default stage for Visitor Counter API
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 50
+        ThrottlingRateLimit: 100
+
+  BackendWAFWebACL:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: VisitorCounterApiWAF
+      Description: WAF for the visitor counter API Gateway
+      Scope: REGIONAL
+      DefaultAction:
+        Allow: {}
+      VisibilityConfig:
+        CloudWatchMetricsEnabled: true
+        MetricName: VisitorCounterApiWAF
+        SampledRequestsEnabled: true
+      Rules:
+        - Name: RateLimit500Per5MinPerIP
+          Priority: 1
+          Action:
+            Block: {}
+          Statement:
+            RateBasedStatement:
+              Limit: 500
+              AggregateKeyType: IP
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: RateLimit500Per5MinPerIP
+            SampledRequestsEnabled: true
+
+        - Name: AWS-AWSManagedRulesCommonRuleSet
+          Priority: 10
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesCommonRuleSet
+          OverrideAction:
+            None: {}
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: AWS-AWSManagedRulesCommonRuleSet
+            SampledRequestsEnabled: true
+
+        - Name: AWS-AWSManagedRulesBotControlRuleSet
+          Priority: 20
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesBotControlRuleSet
+          OverrideAction:
+            None: {}
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: AWS-AWSManagedRulesBotControlRuleSet
+            SampledRequestsEnabled: true
+
+  BackendWAFWebACLAssociation:
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties:
+      ResourceArn: !Sub "arn:aws:apigateway:${AWS::Region}::/apis/${BackendApi}/stages/${BackendApiStage}"
+      WebACLArn: !GetAtt BackendWAFWebACL.Arn
