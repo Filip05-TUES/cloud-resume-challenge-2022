@@ -20,7 +20,7 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       RoleName: VisitorCounterLambdaExecutionRole
-      Description: Execution role for the Visitor Counter Lambda function.
+      Description: Execution role for the Visitor Counter Lambda function
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
