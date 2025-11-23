@@ -461,7 +461,7 @@ Resources:
               "properties": {
                 "title": "API Latency (p90)",
                 "metrics": [
-                  [ "AWS/ApiGateway", "Latency", "ApiId", "${BackendRestApi}", "Stage", "prod", { "stat": "p90" } ]
+                  [ "AWS/ApiGateway", "Latency", "ApiName", "VisitorCounterAPI", "Stage", "prod", { "stat": "p90" } ]
                 ],
                 "region": "${AWS::Region}"
               }
@@ -473,7 +473,7 @@ Resources:
               "properties": {
                 "title": "WAF Blocked Requests",
                 "metrics": [
-                  [ "AWS/WAFV2", "BlockedRequests", "WebACL", "${BackendWAFWebACL}", "Region", "us-east-1" ]
+                  [ "AWS/WAFV2", "BlockedRequests", "WebACLArn", "${BackendWAFWebACL.Arn}", "Region", "us-east-1" ]
                 ],
                 "stat": "Sum",
                 "region": "us-east-1"
