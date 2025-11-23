@@ -236,6 +236,15 @@ Resources:
       SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:*/*/visitor"
       SourceAccount: !Ref "AWS::AccountId"
 
+  BackendUnusedAccessAnalyzer:
+    Type: AWS::AccessAnalyzer::Analyzer
+    Properties:
+      AnalyzerConfiguration: 
+        UnusedAccessConfiguration:
+          UnusedAccessAge: 1
+      AnalyzerName: UnusedAccessAnalyzer
+      Type: ACCOUNT_UNUSED_ACCESS
+
   BackendWAFWebACL:
     Type: AWS::WAFv2::WebACL
     DependsOn:
