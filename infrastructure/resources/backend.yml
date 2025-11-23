@@ -221,6 +221,7 @@ Resources:
       MethodSettings:
         - ResourcePath: "/*"
           HttpMethod: "*"
+          MetricsEnabled: true    
           ThrottlingBurstLimit: 50
           ThrottlingRateLimit: 100
 
@@ -235,6 +236,78 @@ Resources:
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:*/*/visitor"
       SourceAccount: !Ref "AWS::AccountId"
+
+  BackendUnusedAccessAnalyzer:
+    Type: AWS::AccessAnalyzer::Analyzer
+    Properties:
+      AnalyzerConfiguration: 
+        UnusedAccessConfiguration:
+          UnusedAccessAge: 1
+      AnalyzerName: UnusedAccessAnalyzer
+      Type: ACCOUNT_UNUSED_ACCESS
+
+  BackendWAFWebACL:
+    Type: AWS::WAFv2::WebACL
+    DependsOn:
+      - BackendRestApiStage
+    Properties:
+      Name: ApiWAF
+      Description: WAF for the visitor counter API Gateway
+      Scope: REGIONAL
+      DefaultAction:
+        Allow: {}
+      VisibilityConfig:
+        CloudWatchMetricsEnabled: true
+        MetricName: ApiWAF
+        SampledRequestsEnabled: true
+      Rules:
+        - Name: RateLimit500Per5MinPerIP
+          Priority: 1
+          Action:
+            Block: {}
+          Statement:
+            RateBasedStatement:
+              Limit: 500
+              AggregateKeyType: IP
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: RateLimit500Per5MinPerIP
+            SampledRequestsEnabled: true
+
+        - Name: AWS-AWSManagedRulesCommonRuleSet
+          Priority: 10
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesCommonRuleSet
+          OverrideAction:
+            None: {}
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: AWS-AWSManagedRulesCommonRuleSet
+            SampledRequestsEnabled: true
+
+        - Name: AWS-AWSManagedRulesBotControlRuleSet
+          Priority: 20
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesBotControlRuleSet
+          OverrideAction:
+            None: {}
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: AWS-AWSManagedRulesBotControlRuleSet
+            SampledRequestsEnabled: true
+
+  BackendWAFWebACLAssociation:
+    Type: AWS::WAFv2::WebACLAssociation
+    DependsOn:
+      - BackendWAFWebACL
+      - BackendRestApiStage
+    Properties:
+      ResourceArn: !Sub "arn:aws:apigateway:${AWS::Region}::/restapis/${BackendRestApi}/stages/prod"
+      WebACLArn: !GetAtt BackendWAFWebACL.Arn
 
   BackendMonitoringAlertTopic:
     Type: AWS::SNS::Topic
@@ -276,8 +349,8 @@ Resources:
       Namespace: AWS/ApiGateway
       MetricName: Latency
       Dimensions:
-        - Name: ApiId
-          Value: !Ref BackendRestApi
+        - Name: ApiName
+          Value: VisitorCounterAPI
         - Name: Stage
           Value: prod
       ExtendedStatistic: p90
@@ -316,8 +389,8 @@ Resources:
       Namespace: AWS/WAFV2
       MetricName: BlockedRequests
       Dimensions:
-        - Name: WebACL
-          Value: !Ref BackendWAFWebACL
+        - Name: WebACLArn
+          Value: !GetAtt BackendWAFWebACL.Arn
         - Name: Region
           Value: us-east-1
       Statistic: Sum
@@ -421,75 +494,3 @@ Resources:
             }
           ]
         }
-
-  BackendUnusedAccessAnalyzer:
-    Type: AWS::AccessAnalyzer::Analyzer
-    Properties:
-      AnalyzerConfiguration: 
-        UnusedAccessConfiguration:
-          UnusedAccessAge: 1
-      AnalyzerName: UnusedAccessAnalyzer
-      Type: ACCOUNT_UNUSED_ACCESS
-
-  BackendWAFWebACL:
-    Type: AWS::WAFv2::WebACL
-    DependsOn:
-      - BackendRestApiStage
-    Properties:
-      Name: ApiWAF
-      Description: WAF for the visitor counter API Gateway
-      Scope: REGIONAL
-      DefaultAction:
-        Allow: {}
-      VisibilityConfig:
-        CloudWatchMetricsEnabled: true
-        MetricName: ApiWAF
-        SampledRequestsEnabled: true
-      Rules:
-        - Name: RateLimit500Per5MinPerIP
-          Priority: 1
-          Action:
-            Block: {}
-          Statement:
-            RateBasedStatement:
-              Limit: 500
-              AggregateKeyType: IP
-          VisibilityConfig:
-            CloudWatchMetricsEnabled: true
-            MetricName: RateLimit500Per5MinPerIP
-            SampledRequestsEnabled: true
-
-        - Name: AWS-AWSManagedRulesCommonRuleSet
-          Priority: 10
-          Statement:
-            ManagedRuleGroupStatement:
-              VendorName: AWS
-              Name: AWSManagedRulesCommonRuleSet
-          OverrideAction:
-            None: {}
-          VisibilityConfig:
-            CloudWatchMetricsEnabled: true
-            MetricName: AWS-AWSManagedRulesCommonRuleSet
-            SampledRequestsEnabled: true
-
-        - Name: AWS-AWSManagedRulesBotControlRuleSet
-          Priority: 20
-          Statement:
-            ManagedRuleGroupStatement:
-              VendorName: AWS
-              Name: AWSManagedRulesBotControlRuleSet
-          OverrideAction:
-            None: {}
-          VisibilityConfig:
-            CloudWatchMetricsEnabled: true
-            MetricName: AWS-AWSManagedRulesBotControlRuleSet
-            SampledRequestsEnabled: true
-
-  BackendWAFWebACLAssociation:
-    Type: AWS::WAFv2::WebACLAssociation
-    DependsOn:
-      - BackendWAFWebACL
-      - BackendRestApiStage
-    Properties:
-      ResourceArn: !Sub "arn:aws:apigateway:${AWS::Region}::/restapis/${BackendRestApi}/stages/prod"
-      WebACLArn: !GetAtt BackendWAFWebACL.Arn
