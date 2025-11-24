@@ -258,7 +258,7 @@ Resources:
         Allow: {}
       VisibilityConfig:
         CloudWatchMetricsEnabled: true
-        MetricName: BlockedRequests
+        MetricName: ApiWAF
         SampledRequestsEnabled: true
       Rules:
         - Name: RateLimit500Per5MinPerIP
@@ -389,8 +389,8 @@ Resources:
       Namespace: AWS/WAFV2
       MetricName: BlockedRequests
       Dimensions:
-        - Name: WebACLArn
-          Value: !GetAtt BackendWAFWebACL.Arn
+        - Name: WebACL
+          Value: ApiWAF
         - Name: Region
           Value: us-east-1
       Statistic: Sum
@@ -473,7 +473,7 @@ Resources:
               "properties": {
                 "title": "WAF Blocked Requests",
                 "metrics": [
-                  [ "AWS/WAFV2", "BlockedRequests", "WebACLArn", "${BackendWAFWebACL.Arn}", "Region", "us-east-1" ]
+                  [ "AWS/WAFV2", "BlockedRequests", "WebACL", "ApiWAF", "Region", "us-east-1" ]
                 ],
                 "stat": "Sum",
                 "region": "us-east-1"
