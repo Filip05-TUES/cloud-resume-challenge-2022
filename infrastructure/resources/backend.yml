@@ -313,7 +313,6 @@ Resources:
     Type: AWS::SNS::Topic
     Properties:
       TopicName: monitoring-alert-topic
-      KmsMasterKeyId: alias/aws/sns
 
   BackendMonitoringAlertEmailSubscription:
     Type: AWS::SNS::Subscription
