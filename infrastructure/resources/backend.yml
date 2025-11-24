@@ -258,7 +258,7 @@ Resources:
         Allow: {}
       VisibilityConfig:
         CloudWatchMetricsEnabled: true
-        MetricName: ApiWAF
+        MetricName: ApiWAF-AllRequests
         SampledRequestsEnabled: true
       Rules:
         - Name: RateLimit500Per5MinPerIP
@@ -271,7 +271,7 @@ Resources:
               AggregateKeyType: IP
           VisibilityConfig:
             CloudWatchMetricsEnabled: true
-            MetricName: RateLimit500Per5MinPerIP
+            MetricName: Rule-RateLimit
             SampledRequestsEnabled: true
 
         - Name: AWS-AWSManagedRulesCommonRuleSet
@@ -284,7 +284,7 @@ Resources:
             None: {}
           VisibilityConfig:
             CloudWatchMetricsEnabled: true
-            MetricName: AWS-AWSManagedRulesCommonRuleSet
+            MetricName: Rule-CommonRules
             SampledRequestsEnabled: true
 
         - Name: AWS-AWSManagedRulesBotControlRuleSet
@@ -297,7 +297,7 @@ Resources:
             None: {}
           VisibilityConfig:
             CloudWatchMetricsEnabled: true
-            MetricName: AWS-AWSManagedRulesBotControlRuleSet
+            MetricName: Rule-BotControl
             SampledRequestsEnabled: true
 
   BackendWAFWebACLAssociation:
