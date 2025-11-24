@@ -319,7 +319,7 @@ Resources:
     Type: AWS::SNS::Subscription
     Properties:
       Protocol: email
-      Endpoint: f.ermenkov@gmail.com
+      Endpoint: ermenkov.aws+production@gmail.com
       TopicArn: !Ref BackendMonitoringAlertTopic
 
   BackendLambdaErrorsAlarm:
