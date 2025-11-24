@@ -511,3 +511,71 @@ Resources:
         ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AmazonSSMFullAccess
           - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  BackendSlackWebhookLambdaFunction:
+    Type: AWS::Lambda::Function
+    DependsOn:
+      - BackendSlackWebhookLambdaExecutionRole
+    Properties:
+      FunctionName: SlackWebhookLambda
+      Runtime: python3.12
+      Handler: index.lambda_handler
+      Role: !GetAtt BackendSlackWebhookLambdaExecutionRole.Arn
+      PackageType: Zip
+      Timeout: 10
+      MemorySize: 128
+      Code:
+        ZipFile: |
+          import json
+          from urllib.error import HTTPError, URLError
+          from urllib.request import Request, urlopen
+          import boto3
+
+          ssm = boto3.client('ssm')
+
+          def lambda_handler(event,context):
+              print(json.dumps(event))
+              
+              message = json.loads(event['Records'][0]['Sns']['Message'])
+              print(json.dumps(message))
+              
+              alarm_name = message['AlarmName']
+              new_state = message['NewStateValue']
+              reason = message['NewStateReason']
+
+              slack_message = {
+                  'text' = f':fire: {alarm_name} state is now {new_state}: {reason} from Nesq\n'
+                          f'```\n{message}```'
+                              }
+
+              webhook_url = ssm.get_parameter(Name='slackwebhookurl', WithDecryption=True)
+              
+              req = Request(webhook_url['Parameter']['Value'],
+                              json.dumps(slack_message).encode('utf-8'))
+
+              try:
+                  response = urlopen(req)
+                  response.read()
+                  print("Messge posted to Slack")
+              except HTTPError as e:
+                  print(f'Request failed: {e.code} {e.reason})
+              except URLError as e:
+                  print(f'Server Connection failed:  {e.reason})
+
+  BackendMonitoringAlertLambdaSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Protocol: lambda
+        Endpoint: !GetAtt BackendSlackWebhookLambdaFunction.Arn
+        TopicArn: !Ref BackendMonitoringAlertTopic
+
+  BackendLambdaSlackWebhookPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - BackendSlackWebhookLambdaFunction
+    Properties:
+      FunctionName: !Ref BackendSlackWebhookLambdaFunction
+      Action: lambda:InvokeFunction
+      Principal: sns.amazonaws.com
+      SourceArn: !Ref BackendMonitoringAlertTopic
+      SourceAccount: !Ref "AWS::AccountId"
