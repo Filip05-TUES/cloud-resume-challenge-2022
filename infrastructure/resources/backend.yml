@@ -475,7 +475,7 @@ Resources:
               "properties": {
                 "title": "WAF Blocked Requests",
                 "metrics": [
-                  [ "AWS/WAFV2", "BlockedRequests", "WebACL", "ApiWAF", "Region", "${AWS::Region}", "Rule, "ALL" ]
+                  [ "AWS/WAFV2", "BlockedRequests", "WebACL", "ApiWAF", "Region", "${AWS::Region}", "Rule", "ALL" ]
                 ],
                 "stat": "Sum",
                 "region": "${AWS::Region}"
