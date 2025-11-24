@@ -389,10 +389,8 @@ Resources:
       Namespace: AWS/WAFV2
       MetricName: BlockedRequests
       Dimensions:
-        - Name: WebACL
-          Value: ApiWAF
-        - Name: Region
-          Value: !Ref "AWS::Region"
+        - Name: WebACLArn
+          Value: !GetAtt BackendWAFWebACL.Arn
       Statistic: Sum
       Period: 300
       EvaluationPeriods: 1
@@ -473,7 +471,7 @@ Resources:
               "properties": {
                 "title": "WAF Blocked Requests",
                 "metrics": [
-                  [ "AWS/WAFV2", "BlockedRequests", "WebACL", "ApiWAF", "Region", "${AWS::Region}" ]
+                  [ "AWS/WAFV2", "BlockedRequests", "WebACLArn", "${BackendWAFWebACL.Arn}" ]
                 ],
                 "stat": "Sum",
                 "region": "${AWS::Region}"
