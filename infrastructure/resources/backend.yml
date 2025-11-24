@@ -338,7 +338,7 @@ Resources:
       Threshold: 1
       ComparisonOperator: GreaterThanOrEqualToThreshold
       AlarmActions:
-        - !Ref BackendMonitoringAlertTopic
+        - !GetAtt BackendMonitoringAlertTopic.Arn
       TreatMissingData: notBreaching
 
   BackendApiLatencyAlarm:
@@ -359,7 +359,7 @@ Resources:
       Threshold: 800
       ComparisonOperator: GreaterThanThreshold
       AlarmActions:
-        - !Ref BackendMonitoringAlertTopic
+        - !GetAtt BackendMonitoringAlertTopic.Arn
       TreatMissingData: notBreaching
 
   BackendLambdaInvocationsSpikeAlarm:
@@ -378,7 +378,7 @@ Resources:
       Threshold: 25
       ComparisonOperator: GreaterThanThreshold
       AlarmActions:
-        - !Ref BackendMonitoringAlertTopic
+        - !GetAtt BackendMonitoringAlertTopic.Arn
       TreatMissingData: notBreaching
 
   BackendWAFBlockedRequestsAlarm:
@@ -401,7 +401,7 @@ Resources:
       Threshold: 20
       ComparisonOperator: GreaterThanThreshold
       AlarmActions:
-        - !Ref BackendMonitoringAlertTopic
+        - !GetAtt BackendMonitoringAlertTopic.Arn
       TreatMissingData: notBreaching
 
   BackendBillingAlarm:
@@ -420,7 +420,7 @@ Resources:
       Threshold: 50
       ComparisonOperator: GreaterThanOrEqualToThreshold
       AlarmActions:
-        - !Ref BackendMonitoringAlertTopic
+        - !GetAtt BackendMonitoringAlertTopic.Arn
       TreatMissingData: notBreaching
 
   BackendMonitoringDashboard:
