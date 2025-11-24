@@ -392,7 +392,7 @@ Resources:
         - Name: WebACL
           Value: ApiWAF
         - Name: Region
-          Value: us-east-1
+          Value: !Ref "AWS::Region"
       Statistic: Sum
       Period: 300
       EvaluationPeriods: 1
@@ -473,10 +473,10 @@ Resources:
               "properties": {
                 "title": "WAF Blocked Requests",
                 "metrics": [
-                  [ "AWS/WAFV2", "BlockedRequests", "WebACL", "ApiWAF", "Region", "us-east-1" ]
+                  [ "AWS/WAFV2", "BlockedRequests", "WebACL", "ApiWAF", "Region", "${AWS::Region}" ]
                 ],
                 "stat": "Sum",
-                "region": "us-east-1"
+                "region": "${AWS::Region}"
               }
             },
             {
@@ -489,7 +489,7 @@ Resources:
                   [ "AWS/Billing", "EstimatedCharges", "Currency", "USD" ]
                 ],
                 "stat": "Maximum",
-                "region": "us-east-1"
+                "region": "${AWS::Region}"
               }
             }
           ]
