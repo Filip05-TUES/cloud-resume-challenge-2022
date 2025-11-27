@@ -1,6 +1,16 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Backend IaC Configuration
 
+Parameters:
+  VisitorCounterLambdaS3Key:
+    Type: String
+    Description: The S3 key (filename) for the visitor counter Lambda zip file.
+    Default: "visitor-counter-code.zip"
+  SlackWebhookLambdaS3Key:
+    Type: String
+    Description: The S3 key (filename) for the Slack webhook Lambda zip file.
+    Default: "slack-webhook-code.zip"
+
 Resources:
   BackendDatabase:
     Type: AWS::DynamoDB::Table
@@ -87,7 +97,7 @@ Resources:
       FunctionName: VisitorCounterLambda
       Description: Lambda function to handle GET (read) and POST (increment) for visitor count
       Runtime: python3.12
-      Handler: index.lambda_handler
+      Handler: visitor-counter-code.lambda_handler
       Role: !GetAtt BackendLambdaExecutionRole.Arn
       PackageType: Zip
       Timeout: 10
@@ -97,59 +107,8 @@ Resources:
           TABLE_NAME: VisitorCounterDB
           ALLOWED_ORIGIN: "https://best-resume-ever.com"
       Code:
-        ZipFile: |
-          import json
-          import os
-          import boto3
-
-          TABLE_NAME = os.environ.get("TABLE_NAME", "VisitorCounterDB")
-          ALLOWED_ORIGIN = os.environ.get("ALLOWED_ORIGIN", "*")
-
-          dynamodb = boto3.resource("dynamodb")
-          table = dynamodb.Table(TABLE_NAME)
-
-          def _get_method(event):
-              try:
-                  return event.get("httpMethod") or event.get("requestContext", {}).get("http", {}).get("method")
-              except Exception:
-                  return "GET"
-
-          def _text_response(status, text_body):
-              return {
-                  "statusCode": status,
-                  "headers": {
-                      "Content-Type": "text/plain",
-                      "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
-                      "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-                      "Access-Control-Allow-Headers": "'Content-Type'"
-                  },
-                  "body": str(text_body)
-              }
-
-          def lambda_handler(event, context):
-              method = _get_method(event) or "GET"
-              try:
-                  if method == "POST":
-                      res = table.update_item(
-                          Key={"Id": "visitor_count"},
-                          UpdateExpression="SET #c = if_not_exists(#c, :start) + :inc",
-                          ExpressionAttributeNames={"#c": "count"},
-                          ExpressionAttributeValues={":inc": 1, ":start": 0},
-                          ReturnValues="UPDATED_NEW"
-                      )
-                      count = res.get("Attributes", {}).get("count", 0)
-                      return _text_response(200, count)
-                  else:
-                      res = table.get_item(Key={"Id": "visitor_count"})
-                      if "Item" not in res:
-                          table.put_item(Item={"Id": "visitor_count", "count": 0})
-                          count = 0
-                      else:
-                          count = res["Item"].get("count", 0)
-                      return _text_response(200, count)
-              except Exception as e:
-                  print("Error:", str(e))
-                  return _text_response(500, 0)
+        S3Bucket: !Ref BackendLambdaCodeBucket
+        S3Key: !Ref VisitorCounterLambdaS3Key
 
   BackendRestApi:
     Type: AWS::ApiGateway::RestApi
@@ -548,56 +507,14 @@ Resources:
     Properties:
       FunctionName: SlackWebhookLambda
       Runtime: python3.12
-      Handler: index.lambda_handler
+      Handler: slack-webhook-code.lambda_handler
       Role: !GetAtt BackendSlackWebhookLambdaExecutionRole.Arn
       PackageType: Zip
       Timeout: 10
       MemorySize: 128
       Code:
-        ZipFile: |
-          import json
-          import boto3
-          from urllib.error import HTTPError, URLError
-          from urllib.request import Request, urlopen
-
-          ssm = boto3.client('ssm')
-
-          def lambda_handler(event, context):
-              print(json.dumps(event))
-
-              message = json.loads(event['Records'][0]['Sns']['Message'])
-              print(json.dumps(message))
-
-              alarm_name = message['AlarmName']
-              new_state = message['NewStateValue']
-              reason = message['NewStateReason']
-
-              slack_message = {
-                  'text': (f':fire: *{alarm_name}* state is now *{new_state}*: {reason} from Nesq\n'
-                          f'```\n{json.dumps(message, indent=2)}```')
-              }
-
-              try:
-                  param = ssm.get_parameter(Name='slackwebhookurl', WithDecryption=True)
-                  webhook_url = param['Parameter']['Value']
-              except Exception as e:
-                  print(f"Error retrieving SSM parameter 'slackwebhookurl': {str(e)}")
-                  return
-
-              req = Request(
-                  webhook_url,
-                  json.dumps(slack_message).encode('utf-8'),
-                  headers={'Content-Type': 'application/json'}
-              )
-
-              try:
-                  response = urlopen(req)
-                  response.read()
-                  print("Message posted to Slack")
-              except HTTPError as e:
-                  print(f'Request failed: {e.code} {e.reason}')
-              except URLError as e:
-                  print(f'Server Connection failed: {e.reason}')
+        S3Bucket: !Ref BackendLambdaCodeBucket
+        S3Key: !Ref SlackWebhookLambdaS3Key
 
   BackendMonitoringAlertLambdaSubscription:
       Type: AWS::SNS::Subscription

@@ -6,6 +6,11 @@ on:
     paths:
       - "infrastructure/resources/backend.yml"
       - ".github/workflows/backend-resources-cicd.yml"
+      - "src/lambda-functions/code/**"
+
+env:
+  S3_CODE_BUCKET_NAME: crc-backend-lambda-code-bucket
+  TEMP_DIR: ${{ runner.temp }}/lambda_zips
 
 jobs:
   deploy-backend-infrastructure:
@@ -18,6 +23,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Get Deployment Timestamp
+        id: timestamp
+        run: echo "time=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -27,10 +36,29 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: Install cfn-policy-validator
         run: pip install cfn-policy-validator
+
+      - name: Prepare and Zip Code
+        env:
+          DEPLOY_TIME: ${{ steps.timestamp.outputs.time }}
+        run: |
+          mkdir -p $TEMP_DIR
+          zip -j $TEMP_DIR/visitor-counter-code-${DEPLOY_TIME}.zip src/lambda-functions/code/visitor-counter-code.py
+          zip -j $TEMP_DIR/slack-webhook-code-${DEPLOY_TIME}.zip src/lambda-functions/code/slack-webhook-code.py
+
+      - name: Ensure S3 Deployment Bucket Exists
+        run: aws s3 mb s3://${S3_CODE_BUCKET_NAME} || true
+
+      - name: Upload Zips to S3 Bucket
+        env:
+          DEPLOY_TIME: ${{ steps.timestamp.outputs.time }}
+        run: |
+          aws s3 cp $TEMP_DIR/visitor-counter-code-${DEPLOY_TIME}.zip s3://${S3_CODE_BUCKET_NAME}/visitor-counter-code-${DEPLOY_TIME}.zip --no-progress
+          aws s3 cp $TEMP_DIR/slack-webhook-code-${DEPLOY_TIME}.zip s3://${S3_CODE_BUCKET_NAME}/slack-webhook-code-${DEPLOY_TIME}.zip --no-progress
+          echo "Uploaded: s3://${S3_CODE_BUCKET_NAME}/.../${DEPLOY_TIME}.zip"
 
       - name: Validate Template Syntax
         run: |
@@ -44,12 +72,17 @@ jobs:
             --region us-east-1
 
       - name: Deploy Backend Infrastructure
+        env:
+          DEPLOY_TIME: ${{ steps.timestamp.outputs.time }}
         run: |
           aws cloudformation deploy \
             --template-file infrastructure/resources/backend.yml \
             --stack-name backend-resources \
             --capabilities CAPABILITY_NAMED_IAM \
-            --no-fail-on-empty-changeset
+            --no-fail-on-empty-changeset \
+            --parameter-overrides \
+              VisitorCounterLambdaS3Key="visitor-counter-code-${DEPLOY_TIME}.zip" \
+              SlackWebhookLambdaS3Key="slack-webhook-code-${DEPLOY_TIME}.zip"
 
       - name: Debug CloudFormation Failure
         if: failure()
