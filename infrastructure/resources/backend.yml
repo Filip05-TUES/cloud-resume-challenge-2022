@@ -2,6 +2,9 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Backend IaC Configuration
 
 Parameters:
+  LambdaCodeS3Bucket:
+    Type: String
+    Description: The name of the S3 bucket containing the Lambda code artifacts.
   VisitorCounterLambdaS3Key:
     Type: String
     Description: The S3 key (filename) for the visitor counter Lambda zip file.
@@ -59,35 +62,6 @@ Resources:
                   - logs:PutLogEvents
                 Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/VisitorCounterLambda:*"
 
-  BackendLambdaCodeBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: crc-backend-lambda-code-bucket
-      OwnershipControls:
-        Rules:
-          - ObjectOwnership: BucketOwnerEnforced
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-      VersioningConfiguration:
-        Status: Enabled
-      LifecycleConfiguration:
-        Rules:
-          - Id: ExpireOldVersions
-            Status: Enabled
-            NoncurrentVersionExpiration:
-              NoncurrentDays: 30
-          - Id: AbortIncompleteUploads
-            Status: Enabled
-            AbortIncompleteMultipartUpload:
-              DaysAfterInitiation: 7
-
   BackendLambdaFunction:
     Type: AWS::Lambda::Function
     DependsOn:
@@ -107,7 +81,7 @@ Resources:
           TABLE_NAME: VisitorCounterDB
           ALLOWED_ORIGIN: "https://best-resume-ever.com"
       Code:
-        S3Bucket: !Ref BackendLambdaCodeBucket
+        S3Bucket: !Ref LambdaCodeS3Bucket
         S3Key: !Ref VisitorCounterLambdaS3Key
 
   BackendRestApi:
@@ -513,7 +487,7 @@ Resources:
       Timeout: 10
       MemorySize: 128
       Code:
-        S3Bucket: !Ref BackendLambdaCodeBucket
+        S3Bucket: !Ref LambdaCodeS3Bucket
         S3Key: !Ref SlackWebhookLambdaS3Key
 
   BackendMonitoringAlertLambdaSubscription:

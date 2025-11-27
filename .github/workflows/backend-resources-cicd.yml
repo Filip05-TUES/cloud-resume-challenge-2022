@@ -10,7 +10,6 @@ on:
 
 env:
   S3_CODE_BUCKET_NAME: crc-backend-lambda-code-bucket
-  TEMP_DIR: ${{ runner.temp }}/lambda_zips
 
 jobs:
   deploy-backend-infrastructure:
@@ -23,9 +22,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Get Deployment Timestamp
-        id: timestamp
-        run: echo "time=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
+      - name: Get Deployment Timestamp And Temp Path
+        id: envs
+        run: |
+          echo "time=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
+          echo "zip_path=$RUNNER_TEMP/lambda_zips" >> $GITHUB_OUTPUT
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -41,23 +42,57 @@ jobs:
       - name: Install cfn-policy-validator
         run: pip install cfn-policy-validator
 
+      - name: Ensure S3 Code Deployment Bucket Exists and is Securely Configured
+        run: |
+          echo "1. Creating S3 bucket ${S3_CODE_BUCKET_NAME} if it does not exist..."
+          aws s3 mb s3://${S3_CODE_BUCKET_NAME} || true
+
+          echo "2. Applying Public Access Block (Block all public access)..."
+          aws s3api put-public-access-block \
+            --bucket ${S3_CODE_BUCKET_NAME} \
+            --public-access-block-configuration "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
+
+          echo "3. Enforcing BucketOwnerEnforced ownership controls..."
+          aws s3api put-bucket-ownership-controls \
+            --bucket ${S3_CODE_BUCKET_NAME} \
+            --ownership-controls '{"Rules": [{"ObjectOwnership": "BucketOwnerEnforced"}]}'
+
+          echo "4. Enforcing Default Encryption (SSE-AES256)..."
+          aws s3api put-bucket-encryption \
+            --bucket ${S3_CODE_BUCKET_NAME} \
+            --server-side-encryption-configuration '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}'
+
+          echo "5. Enabling Versioning..."
+          aws s3api put-bucket-versioning \
+            --bucket ${S3_CODE_BUCKET_NAME} \
+            --versioning-configuration Status=Enabled
+
+          echo "6. Applying Lifecycle Rules (Cleanup old versions and incomplete uploads)..."
+          aws s3api put-bucket-lifecycle-configuration \
+            --bucket ${S3_CODE_BUCKET_NAME} \
+            --lifecycle-configuration '{"Rules": [
+                {"ID": "ExpireOldVersions", "Status": "Enabled", "NoncurrentVersionExpiration": {"NoncurrentDays": 30}},
+                {"ID": "AbortIncompleteUploads", "Status": "Enabled", "AbortIncompleteMultipartUpload": {"DaysAfterInitiation": 7}}
+            ]}'
+
       - name: Prepare and Zip Code
         env:
-          DEPLOY_TIME: ${{ steps.timestamp.outputs.time }}
+          DEPLOY_TIME: ${{ steps.envs.outputs.time }}
+          TEMP_PATH: ${{ steps.envs.outputs.zip_path }} 
         run: |
-          mkdir -p $TEMP_DIR
-          zip -j $TEMP_DIR/visitor-counter-code-${DEPLOY_TIME}.zip src/lambda-functions/code/visitor-counter-code.py
-          zip -j $TEMP_DIR/slack-webhook-code-${DEPLOY_TIME}.zip src/lambda-functions/code/slack-webhook-code.py
-
-      - name: Ensure S3 Deployment Bucket Exists
-        run: aws s3 mb s3://${S3_CODE_BUCKET_NAME} || true
+          mkdir -p $TEMP_PATH
+          zip -j $TEMP_PATH/visitor-counter-code-${DEPLOY_TIME}.zip src/lambda-functions/code/visitor-counter-code.py
+          zip -j $TEMP_PATH/slack-webhook-code-${DEPLOY_TIME}.zip src/lambda-functions/code/slack-webhook-code.py
 
       - name: Upload Zips to S3 Bucket
         env:
-          DEPLOY_TIME: ${{ steps.timestamp.outputs.time }}
+          DEPLOY_TIME: ${{ steps.envs.outputs.time }}
+          TEMP_PATH: ${{ steps.envs.outputs.zip_path }} 
         run: |
-          aws s3 cp $TEMP_DIR/visitor-counter-code-${DEPLOY_TIME}.zip s3://${S3_CODE_BUCKET_NAME}/visitor-counter-code-${DEPLOY_TIME}.zip --no-progress
-          aws s3 cp $TEMP_DIR/slack-webhook-code-${DEPLOY_TIME}.zip s3://${S3_CODE_BUCKET_NAME}/slack-webhook-code-${DEPLOY_TIME}.zip --no-progress
+          echo "Emptying S3 bucket: ${S3_CODE_BUCKET_NAME}"
+          aws s3 rm s3://${S3_CODE_BUCKET_NAME} --recursive --no-progress
+          aws s3 cp $TEMP_PATH/visitor-counter-code-${DEPLOY_TIME}.zip s3://${S3_CODE_BUCKET_NAME}/visitor-counter-code-${DEPLOY_TIME}.zip --no-progress
+          aws s3 cp $TEMP_PATH/slack-webhook-code-${DEPLOY_TIME}.zip s3://${S3_CODE_BUCKET_NAME}/slack-webhook-code-${DEPLOY_TIME}.zip --no-progress
           echo "Uploaded: s3://${S3_CODE_BUCKET_NAME}/.../${DEPLOY_TIME}.zip"
 
       - name: Validate Template Syntax
@@ -73,7 +108,7 @@ jobs:
 
       - name: Deploy Backend Infrastructure
         env:
-          DEPLOY_TIME: ${{ steps.timestamp.outputs.time }}
+          DEPLOY_TIME: ${{ steps.envs.outputs.time }}
         run: |
           aws cloudformation deploy \
             --template-file infrastructure/resources/backend.yml \
@@ -81,6 +116,7 @@ jobs:
             --capabilities CAPABILITY_NAMED_IAM \
             --no-fail-on-empty-changeset \
             --parameter-overrides \
+              LambdaCodeS3Bucket="${S3_CODE_BUCKET_NAME}" \
               VisitorCounterLambdaS3Key="visitor-counter-code-${DEPLOY_TIME}.zip" \
               SlackWebhookLambdaS3Key="slack-webhook-code-${DEPLOY_TIME}.zip"
 
