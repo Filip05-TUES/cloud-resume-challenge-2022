@@ -8,11 +8,11 @@ Parameters:
   VisitorCounterLambdaS3Key:
     Type: String
     Description: The S3 key (filename) for the visitor counter Lambda zip file.
-    Default: "visitor-counter-code.zip"
+    Default: "visitor_counter_code.zip"
   SlackWebhookLambdaS3Key:
     Type: String
     Description: The S3 key (filename) for the Slack webhook Lambda zip file.
-    Default: "slack-webhook-code.zip"
+    Default: "slack_webhook_code.zip"
 
 Resources:
   BackendDatabase:
@@ -71,7 +71,7 @@ Resources:
       FunctionName: VisitorCounterLambda
       Description: Lambda function to handle GET (read) and POST (increment) for visitor count
       Runtime: python3.12
-      Handler: visitor-counter-code.lambda_handler
+      Handler: visitor_counter_code.lambda_handler
       Role: !GetAtt BackendLambdaExecutionRole.Arn
       PackageType: Zip
       Timeout: 10
@@ -481,7 +481,7 @@ Resources:
     Properties:
       FunctionName: SlackWebhookLambda
       Runtime: python3.12
-      Handler: slack-webhook-code.lambda_handler
+      Handler: slack_webhook_code.lambda_handler
       Role: !GetAtt BackendSlackWebhookLambdaExecutionRole.Arn
       PackageType: Zip
       Timeout: 10
