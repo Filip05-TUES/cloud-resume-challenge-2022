@@ -70,10 +70,7 @@ jobs:
           echo "6. Applying Lifecycle Rules (Cleanup old versions and incomplete uploads)..."
           aws s3api put-bucket-lifecycle-configuration \
             --bucket ${S3_CODE_BUCKET_NAME} \
-            --lifecycle-configuration '{"Rules": [
-                {"ID": "ExpireOldVersions", "Status": "Enabled", "NoncurrentVersionExpiration": {"NoncurrentDays": 30}},
-                {"ID": "AbortIncompleteUploads", "Status": "Enabled", "AbortIncompleteMultipartUpload": {"DaysAfterInitiation": 7}}
-            ]}'
+            --lifecycle-configuration '{"Rules": [{"ID": "ExpireOldVersions", "Status": "Enabled", "NoncurrentVersionExpiration": {"NoncurrentDays": 30}},{"ID": "AbortIncompleteUploads", "Status": "Enabled", "AbortIncompleteMultipartUpload": {"DaysAfterInitiation": 7}}]}'
 
       - name: Prepare and Zip Code
         env:
