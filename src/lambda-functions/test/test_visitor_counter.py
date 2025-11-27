@@ -38,7 +38,7 @@ class VisitorCounterTest(unittest.TestCase):
 
     def test_post_increments_count_successfully(self, mock_boto3):
         mock_table = mock_boto3.resource.return_value.Table.return_value
-        
+
         mock_table.update_item.return_value = {
             "Attributes": {"count": 123}
         }
@@ -109,7 +109,7 @@ class VisitorCounterTest(unittest.TestCase):
         response = visitor_counter_code.lambda_handler(event, context)
 
         mock_table.get_item.assert_called_once()
-        
+
         mock_table.put_item.assert_not_called() 
         mock_table.update_item.assert_not_called()
 

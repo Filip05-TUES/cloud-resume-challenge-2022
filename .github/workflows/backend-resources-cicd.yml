@@ -50,53 +50,28 @@ jobs:
           python -m unittest discover test
           echo "All unit tests passed successfully."
 
-      - name: Ensure S3 Code Deployment Bucket Exists And Is Securely Configured
+      - name: Validate Lambda Code CloudFormation Template Syntax
         run: |
-          echo "1. Creating S3 bucket ${S3_CODE_BUCKET_NAME} if it does not exist..."
-          aws s3 mb s3://${S3_CODE_BUCKET_NAME} || true
+          aws cloudformation validate-template \
+            --template-body file://infrastructure/resources/lambda-bootstrap.yml
 
-          echo "2. Applying Public Access Block (Block all public access)..."
-          aws s3api put-public-access-block \
-            --bucket ${S3_CODE_BUCKET_NAME} \
-            --public-access-block-configuration "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
+      - name: Deploy Lambda Functions Code Storage
+        run: |
+          aws cloudformation deploy \
+            --template-file infrastructure/resources/lambda-bootstrap.yml \
+            --stack-name lambda-bootstrap \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --no-fail-on-empty-changeset \
+            --parameter-overrides \
+              LambdaCodeS3Bucket="${S3_CODE_BUCKET_NAME}"
 
-          echo "3. Enforcing BucketOwnerEnforced ownership controls..."
-          aws s3api put-bucket-ownership-controls \
-            --bucket ${S3_CODE_BUCKET_NAME} \
-            --ownership-controls '{"Rules": [{"ObjectOwnership": "BucketOwnerEnforced"}]}'
-
-          echo "4. Enforcing Default Encryption (SSE-AES256)..."
-          aws s3api put-bucket-encryption \
-            --bucket ${S3_CODE_BUCKET_NAME} \
-            --server-side-encryption-configuration '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}'
-
-          echo "5. Enabling Versioning..."
-          aws s3api put-bucket-versioning \
-            --bucket ${S3_CODE_BUCKET_NAME} \
-            --versioning-configuration Status=Enabled
-
-          cat > $RUNNER_TEMP/lifecycle.json <<'EOF'
-          {
-            "Rules": [
-              {
-                "ID": "ExpireOldVersions",
-                "Status": "Enabled",
-                "Filter": { "Prefix": "" },
-                "NoncurrentVersionExpiration": { "NoncurrentDays": 30 }
-              },
-              {
-                "ID": "AbortIncompleteUploads",
-                "Status": "Enabled",
-                "Filter": { "Prefix": "" },
-                "AbortIncompleteMultipartUpload": { "DaysAfterInitiation": 7 }
-              }
-            ]
-          }
-          EOF
-
-          aws s3api put-bucket-lifecycle-configuration \
-            --bucket ${S3_CODE_BUCKET_NAME} \
-            --lifecycle-configuration file://$RUNNER_TEMP/lifecycle.json
+      - name: Debug CloudFormation Failure
+        if: failure()
+        run: |
+          aws cloudformation describe-stack-events \
+            --stack-name lambda-bootstrap \
+            --query "StackEvents[?ResourceStatus=='CREATE_FAILED' || ResourceStatus=='REVIEW_IN_PROGRESS' || ResourceStatus=='ROLLBACK_IN_PROGRESS'].[LogicalResourceId, ResourceStatus, ResourceStatusReason]" \
+            --output table
 
       - name: Prepare And Zip Code
         env:
