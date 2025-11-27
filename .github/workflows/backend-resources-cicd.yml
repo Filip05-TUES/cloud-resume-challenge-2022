@@ -43,8 +43,11 @@ jobs:
         run: |
           echo "Starting Python Unit Tests..."
           cd src
+          ls
           cd lambda-functions
+          ls
           cd test
+          ls
           python -m unittest discover
           echo "All unit tests passed successfully."
 
