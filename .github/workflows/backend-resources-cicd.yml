@@ -39,6 +39,9 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install Python Dependencies
+        run: pip install boto3 cfn-policy-validator
+
       - name: Run Unit Tests
         run: |
           echo "Starting Python Unit Tests..."
@@ -46,9 +49,6 @@ jobs:
           export PYTHONPATH=./code:$PYTHONPATH
           python -m unittest discover test
           echo "All unit tests passed successfully."
-
-      - name: Install cfn-policy-validator
-        run: pip install cfn-policy-validator
 
       - name: Ensure S3 Code Deployment Bucket Exists And Is Securely Configured
         run: |
