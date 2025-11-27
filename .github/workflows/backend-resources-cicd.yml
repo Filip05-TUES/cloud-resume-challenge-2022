@@ -42,7 +42,7 @@ jobs:
       - name: Install cfn-policy-validator
         run: pip install cfn-policy-validator
 
-      - name: Ensure S3 Code Deployment Bucket Exists and is Securely Configured
+      - name: Ensure S3 Code Deployment Bucket Exists And Is Securely Configured
         run: |
           echo "1. Creating S3 bucket ${S3_CODE_BUCKET_NAME} if it does not exist..."
           aws s3 mb s3://${S3_CODE_BUCKET_NAME} || true
@@ -90,7 +90,7 @@ jobs:
             --bucket ${S3_CODE_BUCKET_NAME} \
             --lifecycle-configuration file://$RUNNER_TEMP/lifecycle.json
 
-      - name: Prepare and Zip Code
+      - name: Prepare And Zip Code
         env:
           DEPLOY_TIME: ${{ steps.envs.outputs.time }}
           TEMP_PATH: ${{ steps.envs.outputs.zip_path }} 
@@ -99,15 +99,15 @@ jobs:
           zip -j $TEMP_PATH/visitor-counter-code-${DEPLOY_TIME}.zip src/lambda-functions/code/visitor-counter-code.py
           zip -j $TEMP_PATH/slack-webhook-code-${DEPLOY_TIME}.zip src/lambda-functions/code/slack-webhook-code.py
 
-      - name: Upload Zips to S3 Bucket
+      - name: Upload Zips To S3 Bucket
         env:
           DEPLOY_TIME: ${{ steps.envs.outputs.time }}
           TEMP_PATH: ${{ steps.envs.outputs.zip_path }} 
         run: |
           echo "Emptying S3 bucket: ${S3_CODE_BUCKET_NAME}"
-          aws s3 rm s3://${S3_CODE_BUCKET_NAME} --recursive --no-progress
-          aws s3 cp $TEMP_PATH/visitor-counter-code-${DEPLOY_TIME}.zip s3://${S3_CODE_BUCKET_NAME}/visitor-counter-code-${DEPLOY_TIME}.zip --no-progress
-          aws s3 cp $TEMP_PATH/slack-webhook-code-${DEPLOY_TIME}.zip s3://${S3_CODE_BUCKET_NAME}/slack-webhook-code-${DEPLOY_TIME}.zip --no-progress
+          aws s3 rm s3://${S3_CODE_BUCKET_NAME} --recursive
+          aws s3 cp $TEMP_PATH/visitor-counter-code-${DEPLOY_TIME}.zip s3://${S3_CODE_BUCKET_NAME}/visitor-counter-code-${DEPLOY_TIME}.zip
+          aws s3 cp $TEMP_PATH/slack-webhook-code-${DEPLOY_TIME}.zip s3://${S3_CODE_BUCKET_NAME}/slack-webhook-code-${DEPLOY_TIME}.zip
           echo "Uploaded: s3://${S3_CODE_BUCKET_NAME}/.../${DEPLOY_TIME}.zip"
 
       - name: Validate Template Syntax
