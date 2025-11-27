@@ -42,14 +42,10 @@ jobs:
       - name: Run Unit Tests
         run: |
           echo "Starting Python Unit Tests..."
-          ls
           cd src
-          ls
           cd lambda-functions
-          ls
           cd test
-          ls
-          python -m unittest discover -s src/lambda-functions/test/
+          python -m unittest discover
           echo "All unit tests passed successfully."
 
       - name: Install cfn-policy-validator
