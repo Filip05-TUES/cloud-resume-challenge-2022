@@ -39,6 +39,13 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Run Unit Tests
+        run: |
+          echo "Starting Python Unit Tests..."
+          export PYTHONPATH=src/lambda-functions/code:$PYTHONPATH
+          python -m unittest discover src/lambda-functions/test/
+          echo "All unit tests passed successfully."
+
       - name: Install cfn-policy-validator
         run: pip install cfn-policy-validator
 
