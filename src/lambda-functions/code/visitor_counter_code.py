@@ -3,14 +3,14 @@ import os
 import boto3
 
 TABLE_NAME = os.environ.get("TABLE_NAME", "VisitorCounterDB")
-ALLOWED_ORIGIN = os.environ.get("ALLOWED_ORIGIN", "*")
 
-dynamodb = boto3.resource("dynamodb")
-table = dynamodb.Table(TABLE_NAME)
+def _get_allowed_origin():
+    return os.environ.get("ALLOWED_ORIGIN", "*")
 
 def _get_method(event):
     try:
-        return event.get("httpMethod") or event.get("requestContext", {}).get("http", {}).get("method")
+        method = event.get("httpMethod") or event.get("requestContext", {}).get("http", {}).get("method")
+        return method if method else "GET"
     except Exception:
         return "GET"
 
@@ -19,7 +19,7 @@ def _text_response(status, text_body):
         "statusCode": status,
         "headers": {
             "Content-Type": "text/plain",
-            "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
+            "Access-Control-Allow-Origin": _get_allowed_origin(),
             "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
             "Access-Control-Allow-Headers": "'Content-Type'"
         },
@@ -27,7 +27,11 @@ def _text_response(status, text_body):
     }
 
 def lambda_handler(event, context):
-    method = _get_method(event) or "GET"
+    dynamodb = boto3.resource("dynamodb")
+    table = dynamodb.Table(TABLE_NAME)
+
+    method = _get_method(event)
+
     try:
         if method == "POST":
             res = table.update_item(

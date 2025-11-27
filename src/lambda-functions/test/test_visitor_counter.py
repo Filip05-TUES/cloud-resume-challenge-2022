@@ -28,7 +28,6 @@ class VisitorCounterTest(unittest.TestCase):
         method = visitor_counter_code._get_method(event)
         self.assertEqual(method, "GET")
 
-
     def test_text_response_structure_and_cors(self, mock_boto3):
         response = visitor_counter_code._text_response(200, 42)
 
