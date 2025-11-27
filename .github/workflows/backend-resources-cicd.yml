@@ -43,7 +43,8 @@ jobs:
         run: |
           echo "Starting Python Unit Tests..."
           export PYTHONPATH=src/lambda-functions/code:$PYTHONPATH
-          python -m unittest discover src/lambda-functions/test/
+          cd src/lambda-functions/test/
+          python -m unittest discover .
           echo "All unit tests passed successfully."
 
       - name: Install cfn-policy-validator
