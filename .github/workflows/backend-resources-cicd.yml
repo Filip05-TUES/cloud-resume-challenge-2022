@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - "infrastructure/resources/backend.yml"
+      - "infrastructure/resources/lambda-bootstrap.yml"
       - ".github/workflows/backend-resources-cicd.yml"
       - "src/lambda-functions/code/**"
 
