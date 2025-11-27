@@ -42,12 +42,7 @@ jobs:
       - name: Run Unit Tests
         run: |
           echo "Starting Python Unit Tests..."
-          cd src
-          ls
-          cd lambda-functions
-          ls
-          cd test
-          ls
+          cd src/lambda-functions/test
           python -m unittest discover
           echo "All unit tests passed successfully."
 
@@ -108,16 +103,16 @@ jobs:
           TEMP_PATH: ${{ steps.envs.outputs.zip_path }} 
         run: |
           mkdir -p $TEMP_PATH
-          zip -j $TEMP_PATH/visitor-counter-code-${DEPLOY_TIME}.zip src/lambda-functions/code/visitor-counter-code.py
-          zip -j $TEMP_PATH/slack-webhook-code-${DEPLOY_TIME}.zip src/lambda-functions/code/slack-webhook-code.py
+          zip -j $TEMP_PATH/visitor_counter_code_${DEPLOY_TIME}.zip src/lambda-functions/code/visitor_counter_code.py
+          zip -j $TEMP_PATH/slack_webhook_code_${DEPLOY_TIME}.zip src/lambda-functions/code/slack_webhook_code.py
 
       - name: Upload Zips To S3 Bucket
         env:
           DEPLOY_TIME: ${{ steps.envs.outputs.time }}
           TEMP_PATH: ${{ steps.envs.outputs.zip_path }} 
         run: |
-          aws s3 cp $TEMP_PATH/visitor-counter-code-${DEPLOY_TIME}.zip s3://${S3_CODE_BUCKET_NAME}/visitor-counter-code-${DEPLOY_TIME}.zip
-          aws s3 cp $TEMP_PATH/slack-webhook-code-${DEPLOY_TIME}.zip s3://${S3_CODE_BUCKET_NAME}/slack-webhook-code-${DEPLOY_TIME}.zip
+          aws s3 cp $TEMP_PATH/visitor_counter_code_${DEPLOY_TIME}.zip s3://${S3_CODE_BUCKET_NAME}/visitor_counter_code_${DEPLOY_TIME}.zip
+          aws s3 cp $TEMP_PATH/slack_webhook_code_${DEPLOY_TIME}.zip s3://${S3_CODE_BUCKET_NAME}/slack_webhook_code_${DEPLOY_TIME}.zip
           echo "Uploaded: s3://${S3_CODE_BUCKET_NAME}/.../${DEPLOY_TIME}.zip"
 
       - name: Validate Template Syntax
@@ -142,8 +137,8 @@ jobs:
             --no-fail-on-empty-changeset \
             --parameter-overrides \
               LambdaCodeS3Bucket="${S3_CODE_BUCKET_NAME}" \
-              VisitorCounterLambdaS3Key="visitor-counter-code-${DEPLOY_TIME}.zip" \
-              SlackWebhookLambdaS3Key="slack-webhook-code-${DEPLOY_TIME}.zip"
+              VisitorCounterLambdaS3Key="visitor_counter_code_${DEPLOY_TIME}.zip" \
+              SlackWebhookLambdaS3Key="slack_webhook_code_${DEPLOY_TIME}.zip"
 
       - name: Debug CloudFormation Failure
         if: failure()
