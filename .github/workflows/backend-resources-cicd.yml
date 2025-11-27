@@ -42,6 +42,7 @@ jobs:
       - name: Run Unit Tests
         run: |
           echo "Starting Python Unit Tests..."
+          export PYTHONPATH=src/lambda-functions/code:$PYTHONPATH
           python -m unittest discover src/lambda-functions/test/
           echo "All unit tests passed successfully."
 
@@ -110,8 +111,6 @@ jobs:
           DEPLOY_TIME: ${{ steps.envs.outputs.time }}
           TEMP_PATH: ${{ steps.envs.outputs.zip_path }} 
         run: |
-          echo "Emptying S3 bucket: ${S3_CODE_BUCKET_NAME}"
-          aws s3 rm s3://${S3_CODE_BUCKET_NAME} --recursive
           aws s3 cp $TEMP_PATH/visitor-counter-code-${DEPLOY_TIME}.zip s3://${S3_CODE_BUCKET_NAME}/visitor-counter-code-${DEPLOY_TIME}.zip
           aws s3 cp $TEMP_PATH/slack-webhook-code-${DEPLOY_TIME}.zip s3://${S3_CODE_BUCKET_NAME}/slack-webhook-code-${DEPLOY_TIME}.zip
           echo "Uploaded: s3://${S3_CODE_BUCKET_NAME}/.../${DEPLOY_TIME}.zip"
