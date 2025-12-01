@@ -6,7 +6,7 @@ from urllib.request import Request, urlopen
 ssm = boto3.client('ssm')
 
 
-def lambda_handler(event):
+def lambda_handler(event, context):
     print(json.dumps(event))
 
     message = json.loads(event['Records'][0]['Sns']['Message'])

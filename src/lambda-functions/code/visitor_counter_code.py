@@ -31,7 +31,7 @@ def _text_response(status, text_body):
     }
 
 
-def lambda_handler(event):
+def lambda_handler(event, context):
     method = _get_method(event)
 
     try:
