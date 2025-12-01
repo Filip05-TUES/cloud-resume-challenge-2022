@@ -156,7 +156,6 @@ class VisitorCounterTest(unittest.TestCase):
         self.assertEqual(response["statusCode"], 500)
         self.assertEqual(response["body"], "0")
 
-    @patch('visitor_counter_code.TABLE')
     def test_get_method_invalid_input_type_defaults_to_get(self):
         event_none = None
         self.assertEqual(visitor_counter_code._get_method(event_none), "GET")
