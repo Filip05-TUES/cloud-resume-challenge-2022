@@ -7,7 +7,7 @@ on:
       - "infrastructure/resources/backend.yml"
       - "infrastructure/resources/lambda-bootstrap.yml"
       - ".github/workflows/backend-resources-cicd.yml"
-      - "src/lambda-functions/code/**"
+      - "src/lambda-functions/**"
 
 env:
   S3_CODE_BUCKET_NAME: crc-backend-lambda-code-bucket

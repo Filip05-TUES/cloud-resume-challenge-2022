@@ -2,6 +2,8 @@ import os
 import boto3
 
 TABLE_NAME = os.environ.get("TABLE_NAME", "VisitorCounterDB")
+DYNAMODB = boto3.resource("dynamodb")
+TABLE = DYNAMODB.Table(TABLE_NAME)
 
 def _get_allowed_origin():
     return os.environ.get("ALLOWED_ORIGIN", "*")
@@ -26,14 +28,11 @@ def _text_response(status, text_body):
     }
 
 def lambda_handler(event, context):
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(TABLE_NAME)
-
     method = _get_method(event)
 
     try:
         if method == "POST":
-            res = table.update_item(
+            res = TABLE.update_item(
                 Key={"Id": "visitor_count"},
                 UpdateExpression="SET #c = if_not_exists(#c, :start) + :inc",
                 ExpressionAttributeNames={"#c": "count"},
@@ -42,14 +41,20 @@ def lambda_handler(event, context):
             )
             count = res.get("Attributes", {}).get("count", 0)
             return _text_response(200, count)
+
+        elif method == "OPTIONS":
+            return _text_response(200, "")
+
         else:
-            res = table.get_item(Key={"Id": "visitor_count"})
+            res = TABLE.get_item(Key={"Id": "visitor_count"})
+
             if "Item" not in res:
-                table.put_item(Item={"Id": "visitor_count", "count": 0})
                 count = 0
             else:
                 count = res["Item"].get("count", 0)
+            
             return _text_response(200, count)
+            
     except Exception as e:
         print("Error:", str(e))
         return _text_response(500, 0)
