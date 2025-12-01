@@ -7,7 +7,6 @@ os.environ["TABLE_NAME"] = "MockVisitorCounterDB"
 os.environ["ALLOWED_ORIGIN"] = "https://mock.resumecount.com"
 
 
-@patch('visitor_counter_code.TABLE')
 class VisitorCounterTest(unittest.TestCase):
     def test_get_method_rest_api_v1(self):
         event = {"httpMethod": "POST"}
@@ -37,6 +36,7 @@ class VisitorCounterTest(unittest.TestCase):
         self.assertEqual(response["headers"]["Content-Type"], "text/plain")
         self.assertEqual(response["headers"]["Access-Control-Allow-Origin"], os.environ["ALLOWED_ORIGIN"])
 
+    @patch('visitor_counter_code.TABLE')
     def test_post_increments_count_successfully(self, mock_table):
         mock_table.update_item.return_value = {
             "Attributes": {"count": 123}
@@ -58,6 +58,7 @@ class VisitorCounterTest(unittest.TestCase):
         self.assertEqual(response["statusCode"], 200)
         self.assertEqual(response["body"], "123")
 
+    @patch('visitor_counter_code.TABLE')
     def test_get_returns_existing_count(self, mock_table):
         mock_table.get_item.return_value = {
             "Item": {"Id": "visitor_count", "count": 50}
@@ -75,6 +76,7 @@ class VisitorCounterTest(unittest.TestCase):
 
         mock_table.update_item.assert_not_called()
 
+    @patch('visitor_counter_code.TABLE')
     def test_get_returns_zero_when_item_missing(self, mock_table):
         mock_table.get_item.return_value = {}
 
@@ -90,6 +92,7 @@ class VisitorCounterTest(unittest.TestCase):
         self.assertEqual(response["statusCode"], 200)
         self.assertEqual(response["body"], "0")
 
+    @patch('visitor_counter_code.TABLE')
     def test_get_returns_zero_if_count_attribute_missing(self, mock_table):
         mock_table.get_item.return_value = {
             "Item": {"Id": "visitor_count"}
@@ -108,6 +111,7 @@ class VisitorCounterTest(unittest.TestCase):
         self.assertEqual(response["statusCode"], 200)
         self.assertEqual(response["body"], "0")
 
+    @patch('visitor_counter_code.TABLE')
     def test_unsupported_method_falls_back_to_get(self, mock_table):
         mock_table.get_item.return_value = {
             "Item": {"Id": "visitor_count", "count": 99}
@@ -124,6 +128,7 @@ class VisitorCounterTest(unittest.TestCase):
         self.assertEqual(response["statusCode"], 200)
         self.assertEqual(response["body"], "99")
 
+    @patch('visitor_counter_code.TABLE')
     def test_dynamodb_post_failure_returns_500(self, mock_table):
         mock_table.update_item.side_effect = Exception("Mock DynamoDB Error on POST")
 
@@ -137,6 +142,7 @@ class VisitorCounterTest(unittest.TestCase):
         self.assertEqual(response["statusCode"], 500)
         self.assertEqual(response["body"], "0")
 
+    @patch('visitor_counter_code.TABLE')
     def test_dynamodb_get_failure_returns_500(self, mock_table):
         mock_table.get_item.side_effect = Exception("Mock DynamoDB Error on GET")
 
@@ -150,6 +156,7 @@ class VisitorCounterTest(unittest.TestCase):
         self.assertEqual(response["statusCode"], 500)
         self.assertEqual(response["body"], "0")
 
+    @patch('visitor_counter_code.TABLE')
     def test_get_method_invalid_input_type_defaults_to_get(self):
         event_none = None
         self.assertEqual(visitor_counter_code._get_method(event_none), "GET")
@@ -157,6 +164,7 @@ class VisitorCounterTest(unittest.TestCase):
         event_string = "invalid event"
         self.assertEqual(visitor_counter_code._get_method(event_string), "GET")
 
+    @patch('visitor_counter_code.TABLE')
     def test_post_returns_zero_if_attributes_missing(self, mock_table):
         mock_table.update_item.return_value = {}
 
@@ -168,6 +176,7 @@ class VisitorCounterTest(unittest.TestCase):
         self.assertEqual(response["statusCode"], 200)
         self.assertEqual(response["body"], "0")
 
+    @patch('visitor_counter_code.TABLE')
     def test_get_with_http_api_v2_event(self, mock_table):
         mock_table.get_item.return_value = {
             "Item": {"Id": "visitor_count", "count": 22}
@@ -182,6 +191,7 @@ class VisitorCounterTest(unittest.TestCase):
         self.assertEqual(response["statusCode"], 200)
         self.assertEqual(response["body"], "22")
 
+    @patch('visitor_counter_code.TABLE')
     def test_post_with_http_api_v2_event(self, mock_table):
         mock_table.update_item.return_value = {
             "Attributes": {"count": 23}
@@ -196,6 +206,7 @@ class VisitorCounterTest(unittest.TestCase):
         self.assertEqual(response["statusCode"], 200)
         self.assertEqual(response["body"], "23")
 
+    @patch('visitor_counter_code.TABLE')
     def test_options_method_returns_200_without_db_call(self, mock_table):
         event = {"httpMethod": "OPTIONS"}
         context = MagicMock()
@@ -209,7 +220,7 @@ class VisitorCounterTest(unittest.TestCase):
         self.assertIn("Access-Control-Allow-Origin", response["headers"])
         self.assertIn("Access-Control-Allow-Methods", response["headers"])
 
-    @patch('visitor_counter_code.DYNAMODB')
+    @patch('visitor_counter_code.TABLE')
     @patch.dict(os.environ, {}, clear=True)
     def test_defaults_when_env_vars_missing(self, mock_table):
         mock_table.get_item.return_value = {
