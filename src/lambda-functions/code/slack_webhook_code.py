@@ -5,7 +5,8 @@ from urllib.request import Request, urlopen
 
 ssm = boto3.client('ssm')
 
-def lambda_handler(event, context):
+
+def lambda_handler(event):
     print(json.dumps(event))
 
     message = json.loads(event['Records'][0]['Sns']['Message'])
@@ -17,7 +18,7 @@ def lambda_handler(event, context):
 
     slack_message = {
         'text': (f':fire: *{alarm_name}* state is now *{new_state}*: {reason} from Nesq\n'
-                f'```\n{json.dumps(message, indent=2)}```')
+                 f'```\n{json.dumps(message, indent=2)}```')
     }
 
     try:

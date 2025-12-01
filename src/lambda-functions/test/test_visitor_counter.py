@@ -1,34 +1,35 @@
 import unittest
-from unittest.mock import patch, MagicMock, patch.dict 
+from unittest.mock import MagicMock, patch
 import os
 import visitor_counter_code
 
 os.environ["TABLE_NAME"] = "MockVisitorCounterDB"
 os.environ["ALLOWED_ORIGIN"] = "https://mock.resumecount.com"
 
+
 @patch('visitor_counter_code.TABLE')
 class VisitorCounterTest(unittest.TestCase):
-    def test_get_method_rest_api_v1(self, mock_table):
+    def test_get_method_rest_api_v1(self):
         event = {"httpMethod": "POST"}
         method = visitor_counter_code._get_method(event)
         self.assertEqual(method, "POST")
 
-    def test_get_method_http_api_v2(self, mock_table):
+    def test_get_method_http_api_v2(self):
         event = {"requestContext": {"http": {"method": "GET"}}}
         method = visitor_counter_code._get_method(event)
         self.assertEqual(method, "GET")
 
-    def test_get_method_empty_event_defaults_to_get(self, mock_table):
+    def test_get_method_empty_event_defaults_to_get(self):
         event = {}
         method = visitor_counter_code._get_method(event)
         self.assertEqual(method, "GET")
 
-    def test_get_method_invalid_event_defaults_to_get(self, mock_table):
+    def test_get_method_invalid_event_defaults_to_get(self):
         event = {"some_key": 123}
         method = visitor_counter_code._get_method(event)
         self.assertEqual(method, "GET")
 
-    def test_text_response_structure_and_cors(self, mock_table):
+    def test_text_response_structure_and_cors(self):
         response = visitor_counter_code._text_response(200, 42)
 
         self.assertEqual(response["statusCode"], 200)
@@ -91,7 +92,7 @@ class VisitorCounterTest(unittest.TestCase):
 
     def test_get_returns_zero_if_count_attribute_missing(self, mock_table):
         mock_table.get_item.return_value = {
-            "Item": {"Id": "visitor_count"} 
+            "Item": {"Id": "visitor_count"}
         }
 
         event = {"httpMethod": "GET"}
@@ -101,7 +102,7 @@ class VisitorCounterTest(unittest.TestCase):
 
         mock_table.get_item.assert_called_once()
 
-        mock_table.put_item.assert_not_called() 
+        mock_table.put_item.assert_not_called()
         mock_table.update_item.assert_not_called()
 
         self.assertEqual(response["statusCode"], 200)
@@ -149,15 +150,15 @@ class VisitorCounterTest(unittest.TestCase):
         self.assertEqual(response["statusCode"], 500)
         self.assertEqual(response["body"], "0")
 
-    def test_get_method_invalid_input_type_defaults_to_get(self, mock_table):
+    def test_get_method_invalid_input_type_defaults_to_get(self):
         event_none = None
         self.assertEqual(visitor_counter_code._get_method(event_none), "GET")
-        
+
         event_string = "invalid event"
         self.assertEqual(visitor_counter_code._get_method(event_string), "GET")
 
     def test_post_returns_zero_if_attributes_missing(self, mock_table):
-        mock_table.update_item.return_value = {} 
+        mock_table.update_item.return_value = {}
 
         event = {"httpMethod": "POST"}
         context = MagicMock()
@@ -171,7 +172,7 @@ class VisitorCounterTest(unittest.TestCase):
         mock_table.get_item.return_value = {
             "Item": {"Id": "visitor_count", "count": 22}
         }
-        
+
         event = {"requestContext": {"http": {"method": "GET"}}}
         context = MagicMock()
         response = visitor_counter_code.lambda_handler(event, context)
@@ -200,21 +201,21 @@ class VisitorCounterTest(unittest.TestCase):
         context = MagicMock()
         response = visitor_counter_code.lambda_handler(event, context)
 
-        mock_table.get_item.assert_not_called() 
+        mock_table.get_item.assert_not_called()
         mock_table.update_item.assert_not_called()
 
         self.assertEqual(response["statusCode"], 200)
-        self.assertEqual(response["body"], "") 
+        self.assertEqual(response["body"], "")
         self.assertIn("Access-Control-Allow-Origin", response["headers"])
         self.assertIn("Access-Control-Allow-Methods", response["headers"])
 
     @patch('visitor_counter_code.DYNAMODB')
     @patch.dict(os.environ, {}, clear=True)
-    def test_defaults_when_env_vars_missing(self, mock_dynamodb, mock_table):
+    def test_defaults_when_env_vars_missing(self, mock_table):
         mock_table.get_item.return_value = {
             "Item": {"Id": "visitor_count", "count": 1}
         }
-        
+
         event = {"httpMethod": "GET"}
         context = MagicMock()
         response = visitor_counter_code.lambda_handler(event, context)
@@ -222,6 +223,7 @@ class VisitorCounterTest(unittest.TestCase):
         self.assertEqual(response["headers"]["Access-Control-Allow-Origin"], "*")
         self.assertEqual(response["statusCode"], 200)
         self.assertEqual(response["body"], "1")
+
 
 if __name__ == '__main__':
     unittest.main()

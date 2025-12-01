@@ -5,8 +5,10 @@ TABLE_NAME = os.environ.get("TABLE_NAME", "VisitorCounterDB")
 DYNAMODB = boto3.resource("dynamodb")
 TABLE = DYNAMODB.Table(TABLE_NAME)
 
+
 def _get_allowed_origin():
     return os.environ.get("ALLOWED_ORIGIN", "*")
+
 
 def _get_method(event):
     try:
@@ -14,6 +16,7 @@ def _get_method(event):
         return method if method else "GET"
     except Exception:
         return "GET"
+
 
 def _text_response(status, text_body):
     return {
@@ -27,7 +30,8 @@ def _text_response(status, text_body):
         "body": str(text_body)
     }
 
-def lambda_handler(event, context):
+
+def lambda_handler(event):
     method = _get_method(event)
 
     try:
@@ -52,9 +56,9 @@ def lambda_handler(event, context):
                 count = 0
             else:
                 count = res["Item"].get("count", 0)
-            
+
             return _text_response(200, count)
-            
+
     except Exception as e:
         print("Error:", str(e))
         return _text_response(500, 0)
