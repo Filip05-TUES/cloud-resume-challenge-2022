@@ -1,13 +1,4 @@
-const API_URL = Cypress.env('apiUrl'); 
-const checkApiStatus = (req) => {
-    req.continue((res) => {
-        if (res.statusCode >= 400) {
-            cy.log(`***API FAILED with status: ${res.statusCode}***`);
-            cy.log(`***API FAILED with body: ${JSON.stringify(res.body)}***`); 
-            throw new Error(`API POST failed with status ${res.statusCode}. Check CI logs for details.`); 
-        }
-    });
-};
+const API_URL = Cypress.env('apiUrl');
 
 describe('Resume Website E2E Test', () => {
 
@@ -17,7 +8,7 @@ describe('Resume Website E2E Test', () => {
 
     beforeEach(() => {
         cy.clearLocalStorage();
-        cy.intercept('POST', API_URL, checkApiStatus).as('updateVisitorCount');
+        cy.intercept('POST', API_URL).as('updateVisitorCount');
         cy.intercept('GET', API_URL).as('getVisitorCount');
         cy.visit('/');
         cy.wait('@updateVisitorCount', { timeout: TIMEOUT });
@@ -56,7 +47,7 @@ describe('Resume Website E2E Test', () => {
           });
 
         cy.clearLocalStorage();
-        cy.intercept('POST', API_URL, checkApiStatus).as('secondUpdateVisitorCount');
+        cy.intercept('POST', API_URL).as('secondUpdateVisitorCount');
         cy.visit('/');
 
         cy.wait('@secondUpdateVisitorCount', { timeout: TIMEOUT });

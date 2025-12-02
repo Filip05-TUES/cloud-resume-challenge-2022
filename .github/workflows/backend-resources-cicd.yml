@@ -14,6 +14,7 @@ on:
 env:
   S3_CODE_BUCKET_NAME: crc-backend-lambda-code-bucket
   RESUME_BASE_URL: https://best-resume-ever.com
+  RESUME_API_URL: https://dzinfmbutk.execute-api.us-east-1.amazonaws.com/prod/visitor
 
 jobs:
   deploy-backend-infrastructure:
@@ -146,7 +147,9 @@ jobs:
       - name: Run Cypress E2E Tests
         uses: cypress-io/github-action@v6
         with:
-          config: baseUrl=${{ env.RESUME_BASE_URL }}
-          wait-on: ${{ env.RESUME_BASE_URL }}
+          wait-on:
+            - ${{ env.RESUME_API_URL }}
+            - ${{ env.RESUME_BASE_URL }}
         env:
-          CYPRESS_API_URL: https://dzinfmbutk.execute-api.us-east-1.amazonaws.com/prod/visitor
+          CYPRESS_API_URL: ${{ env.RESUME_API_URL }}
+          CYPRESS_BASE_URL: ${{ env.RESUME_BASE_URL }}
