@@ -146,8 +146,7 @@ jobs:
       - name: Run Cypress E2E Tests
         uses: cypress-io/github-action@v6
         with:
-          command: npm run cypress:run
           config: baseUrl=${{ env.RESUME_BASE_URL }}
           wait-on: ${{ env.RESUME_BASE_URL }}
-        env:
-          CYPRESS_API_URL: https://dzinfmbutk.execute-api.us-east-1.amazonaws.com/prod/visitor
+          env:
+            CYPRESS_API_URL: https://dzinfmbutk.execute-api.us-east-1.amazonaws.com
