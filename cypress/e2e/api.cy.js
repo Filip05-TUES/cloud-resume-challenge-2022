@@ -6,6 +6,9 @@ describe('API Smoke Test', () => {
     cy.request({
       method: 'GET',
       url: API_URL,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
     }).then((response) => {
       expect(response.status).to.eq(200);
       const count = parseInt(response.body, 10);
@@ -20,6 +23,9 @@ describe('API Smoke Test', () => {
     cy.request({
       method: 'GET',
       url: API_URL,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
     }).then((response) => {
       expect(response.status).to.eq(200);
       initialCount = parseInt(response.body, 10);
@@ -30,6 +36,9 @@ describe('API Smoke Test', () => {
       cy.request({
         method: 'POST',
         url: API_URL,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
       }).then((response) => {
         expect(response.status).to.eq(200);
         newCount = parseInt(response.body, 10);
@@ -41,6 +50,9 @@ describe('API Smoke Test', () => {
       cy.request({
         method: 'GET',
         url: API_URL,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
       }).then((response) => {
         expect(response.status).to.eq(200);
         const updatedCount = parseInt(response.body, 10);
@@ -54,7 +66,10 @@ describe('API Smoke Test', () => {
     cy.request({
       method: 'PUT',
       url: API_URL,
-      failOnStatusCode: false
+      failOnStatusCode: false,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
     }).then((response) => {
       expect(response.status).to.eq(200);
       const count = parseInt(response.body, 10);

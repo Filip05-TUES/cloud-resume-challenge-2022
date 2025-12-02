@@ -1,4 +1,4 @@
-describe('Resume Website E2E Test (DevOps Mod)', () => {
+describe('Resume Website E2E Test', () => {
 
   const VISITOR_COUNT_SELECTOR = '#visitor-count';
   const NUMBER_REGEX = /(\d+)/; 
