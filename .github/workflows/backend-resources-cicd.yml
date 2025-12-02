@@ -146,10 +146,6 @@ jobs:
 
       - name: Run Cypress E2E Tests
         uses: cypress-io/github-action@v6
-        with:
-          wait-on: |
-            ${{ env.RESUME_API_URL }}
-            ${{ env.RESUME_BASE_URL }}
         env:
           CYPRESS_API_URL: ${{ env.RESUME_API_URL }}
           CYPRESS_BASE_URL: ${{ env.RESUME_BASE_URL }}
