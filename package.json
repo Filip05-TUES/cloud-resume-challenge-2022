@@ -1,0 +1,24 @@
+{
+  "name": "cloud-resume-challenge-2022",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "cypress": "^15.7.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Filip05-TUES/cloud-resume-challenge-2022.git"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Filip05-TUES/cloud-resume-challenge-2022/issues"
+  },
+  "homepage": "https://github.com/Filip05-TUES/cloud-resume-challenge-2022#readme"
+}

@@ -8,9 +8,12 @@ on:
       - "infrastructure/resources/lambda-bootstrap.yml"
       - ".github/workflows/backend-resources-cicd.yml"
       - "src/lambda-functions/**"
+      - "cypress/e2e/**"
+      - "cypress.config.js"
 
 env:
   S3_CODE_BUCKET_NAME: crc-backend-lambda-code-bucket
+  RESUME_BASE_URL: https://best-resume-ever.com
 
 jobs:
   deploy-backend-infrastructure:
@@ -124,3 +127,27 @@ jobs:
             --stack-name backend-resources \
             --query "StackEvents[?ResourceStatus=='CREATE_FAILED' || ResourceStatus=='REVIEW_IN_PROGRESS' || ResourceStatus=='ROLLBACK_IN_PROGRESS'].[LogicalResourceId, ResourceStatus, ResourceStatusReason]" \
             --output table
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: deploy-backend-infrastructure
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Cypress Dependencies
+        run: npm install
+
+      - name: Run Cypress E2E Tests
+        uses: cypress-io/github-action@v6
+        with:
+          command: npm run cypress:run
+          config: baseUrl=${{ env.RESUME_BASE_URL }}
+          wait-on: ${{ env.RESUME_BASE_URL }}
+        env:
+          CYPRESS_API_URL: https://dzinfmbutk.execute-api.us-east-1.amazonaws.com/prod/visitor
