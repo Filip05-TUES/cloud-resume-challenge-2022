@@ -1,4 +1,4 @@
-const API_URL = Cypress.env('CYPRESS_API_URL'); 
+const API_URL = Cypress.env('apiUrl'); 
 
 describe('Resume Website E2E Test', () => {
 
@@ -83,7 +83,7 @@ describe('Resume Website E2E Test', () => {
             const match = text.match(NUMBER_REGEX);
             const secondCount = match ? parseInt(match[0], 10) : NaN;
             cy.log(`Count after reload (Still N): ${secondCount}`);
-            
+
             expect(secondCount).to.eq(firstCount);
           });
     });
