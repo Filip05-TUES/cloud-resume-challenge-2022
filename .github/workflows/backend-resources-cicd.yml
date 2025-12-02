@@ -148,5 +148,5 @@ jobs:
         with:
           config: baseUrl=${{ env.RESUME_BASE_URL }}
           wait-on: ${{ env.RESUME_BASE_URL }}
-          env:
-            CYPRESS_API_URL: https://dzinfmbutk.execute-api.us-east-1.amazonaws.com
+        env:
+          CYPRESS_API_URL: https://dzinfmbutk.execute-api.us-east-1.amazonaws.com
