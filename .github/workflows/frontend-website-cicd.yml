@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - "bucket-content/**"
+      - ".github/workflows/frontend-website-cicd.yml"
 
 jobs:
   sync-website-to-s3:
@@ -54,3 +55,24 @@ jobs:
       - name: Skip CloudFront Invalidation If Not Found
         if: env.distribution_ids == ''
         run: echo "No CloudFront distribution found for best-resume-ever.com. Skipping invalidation."
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: sync-website-to-s3
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Cypress Dependencies
+        run: npm install
+
+      - name: Run Cypress E2E Tests
+        uses: cypress-io/github-action@v6
+        env:
+          CYPRESS_API_URL: ${{ env.RESUME_API_URL }}
+          CYPRESS_BASE_URL: ${{ env.RESUME_BASE_URL }}

@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - "infrastructure/resources/frontend.yml"
+      - ".github/workflows/frontend-resources-cicd.yml"
 
 jobs:
   deploy-frontend-infrastructure:
@@ -43,3 +44,24 @@ jobs:
             --stack-name frontend-resources \
             --query "StackEvents[?ResourceStatus=='CREATE_FAILED' || ResourceStatus=='REVIEW_IN_PROGRESS' || ResourceStatus=='ROLLBACK_IN_PROGRESS'].[LogicalResourceId, ResourceStatus, ResourceStatusReason]" \
             --output table
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: deploy-frontend-infrastructure
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Cypress Dependencies
+        run: npm install
+
+      - name: Run Cypress E2E Tests
+        uses: cypress-io/github-action@v6
+        env:
+          CYPRESS_API_URL: ${{ env.RESUME_API_URL }}
+          CYPRESS_BASE_URL: ${{ env.RESUME_BASE_URL }}
