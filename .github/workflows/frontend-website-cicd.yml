@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - "bucket-content/**"
+      - "src/website/**"
       - ".github/workflows/frontend-website-cicd.yml"
 
 env:
@@ -30,8 +30,8 @@ jobs:
 
       - name: Sync Bucket Content Folder To S3
         run: |
-          echo "Syncing bucket-content/ folder to S3 bucket..."
-          aws s3 sync bucket-content/ s3://crc-frontend-bucket/ \
+          echo "Syncing src/website/ folder to S3 bucket..."
+          aws s3 sync src/website/ s3://crc-frontend-bucket/ \
             --delete \
             --acl bucket-owner-full-control \
             --no-progress
