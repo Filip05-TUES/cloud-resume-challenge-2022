@@ -168,6 +168,7 @@ ul {
     align-items: center;
     z-index: 10;
     transition: all 0.3s ease;
+    overflow: scroll;
 }
 
 .aside .logo {
@@ -274,6 +275,7 @@ ul {
 
 .aside .nav {
     margin-top: 50px;
+    max-height: 50%;
 }
 
 .aside .nav li {
