@@ -402,14 +402,12 @@ h3.my-profession {
     color: var(--text-black-700);
 }
 
-/* Personal info column remains the main column (left) */
 .about .about-content .personal-info {
     flex: 0 0 100%;
     max-width: 100%;
     margin-top: 40px;
 }
 
-/* info items within personal-info */
 .about .about-content .personal-info .info-item {
     flex: 0 0 50%;
     max-width: 50%;
@@ -438,22 +436,18 @@ h3.my-profession {
     margin-top: 10px;
 }
 
-/* Skills now sit inside personal-info and span full width of that column */
 .about .about-content .skills {
-    /* ensure skills are full width of personal-info when moved */
     flex: 0 0 100%;
     max-width: 100%;
     margin-top: 20px;
 }
 
-/* make the skills list use a two-column grid */
 .about .about-content .personal-info .skills .row {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 10px 0px;
 }
 
-/* each skill-item is a normal block when inside the grid */
 .about .about-content .skills .skill-item {
     flex: 0 0 100%;
     max-width: 100%;
@@ -751,7 +745,6 @@ h3.my-profession {
     font-weight: 400;
 }
 
-/* Responsive tweaks */
 @media (max-width: 1199px) {
     .aside {
         left: -270px;
@@ -778,6 +771,7 @@ h3.my-profession {
     .about .about-content .personal-info .info-item p span {
         display: block;
         margin-left: 0;
+        font-size: 80%;
     }
 }
 
@@ -811,7 +805,6 @@ h3.my-profession {
         text-align: center;
     }
 
-    /* On medium screens make sure personal-info + skills still look good */
     .about .about-content .personal-info {
         flex: 0 0 100%;
         max-width: 100%;
@@ -836,7 +829,6 @@ h3.my-profession {
         max-width: 100%;
     }
 
-    /* single column for skills on small screens */
     .about .about-content .personal-info .skills .row {
         grid-template-columns: 1fr;
     }
