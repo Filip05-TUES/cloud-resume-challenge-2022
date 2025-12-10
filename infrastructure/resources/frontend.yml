@@ -57,7 +57,7 @@ Resources:
         Enabled: true
         Aliases:
           - best-resume-ever.com
-        DefaultRootObject: website/pages/main/main.html
+        DefaultRootObject: index.html
         HttpVersion: http2
         IPV6Enabled: true
         PriceClass: PriceClass_100
@@ -84,11 +84,11 @@ Resources:
           MinimumProtocolVersion: TLSv1.2_2021
         CustomErrorResponses:
           - ErrorCode: 404
-            ResponsePagePath: /website/pages/main/main.html
+            ResponsePagePath: index.html
             ResponseCode: 200
             ErrorCachingMinTTL: 300
           - ErrorCode: 403
-            ResponsePagePath: /website/pages/main/main.html
+            ResponsePagePath: index.html
             ResponseCode: 200
             ErrorCachingMinTTL: 300
 
