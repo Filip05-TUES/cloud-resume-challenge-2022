@@ -7,6 +7,10 @@ on:
       - "bucket-content/**"
       - ".github/workflows/frontend-website-cicd.yml"
 
+env:
+  RESUME_BASE_URL: https://best-resume-ever.com
+  RESUME_API_URL: https://dzinfmbutk.execute-api.us-east-1.amazonaws.com/prod/visitor
+
 jobs:
   sync-website-to-s3:
     runs-on: ubuntu-latest

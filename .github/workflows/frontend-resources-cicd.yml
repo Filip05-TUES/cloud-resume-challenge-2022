@@ -7,6 +7,10 @@ on:
       - "infrastructure/resources/frontend.yml"
       - ".github/workflows/frontend-resources-cicd.yml"
 
+env:
+  RESUME_BASE_URL: https://best-resume-ever.com
+  RESUME_API_URL: https://dzinfmbutk.execute-api.us-east-1.amazonaws.com/prod/visitor
+
 jobs:
   deploy-frontend-infrastructure:
     runs-on: ubuntu-latest
