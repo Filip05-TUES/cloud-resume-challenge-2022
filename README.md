@@ -18,7 +18,7 @@
 8. [Observability & alerting](#observability--alerting)
 9. [Operational runbook: deploy, rollback, debug](#operational-runbook-deploy-rollback-debug)
 10. [Troubleshooting quick commands](#troubleshooting-quick-commands)
-11. [Costs For Current Setup](#costs-for-current-setup)
+11. [Costs for current setup](#costs-for-current-setup)
 12. [Contacts & license](#contacts--license)
 
 ---
@@ -272,4 +272,4 @@ aws accessanalyzer list-findings --analyzer-name UnusedAccessAnalyzer
 ## Contacts & license
 
 **Owner:** Filip Ermenkov — [f.ermenkov@gmail.com](mailto:f.ermenkov@gmail.com)\
-**License:** This project is licensed under the [MIT License](LICENSE).
+**License:** This project is licensed under the [MIT License](LICENSE)
