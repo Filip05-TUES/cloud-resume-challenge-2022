@@ -1,6 +1,6 @@
 # My Cloud Resume Challenge Implementation
 
-**Based on:** Forrest Brazeal — Cloud Resume Challenge (2022)\
+**Based on:** Forrest Brazeal — Cloud Resume Challenge 2022 (AWS Edition)\
 **Owner:** Filip Ermenkov\
 **Purpose:** Production-focused implementation: static resume (S3 + CloudFront) with a serverless visitor counter (API Gateway → Lambda → DynamoDB) and automated CI/CD via GitHub Actions + OIDC.
 
