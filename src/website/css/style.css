@@ -168,7 +168,6 @@ ul {
     align-items: center;
     z-index: 10;
     transition: all 0.3s ease;
-    overflow: scroll;
 }
 
 .aside .logo {
@@ -748,6 +747,7 @@ h3.my-profession {
 @media (max-width: 1199px) {
     .aside {
         left: -270px;
+        overflow: scroll;
     }
 
     .aside.open {
